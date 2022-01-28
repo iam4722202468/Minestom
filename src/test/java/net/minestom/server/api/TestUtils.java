@@ -43,6 +43,25 @@ public class TestUtils {
         assertEqualsIgnoreSpace(s1, s2, true);
     }
 
+    public static Player createDummyPlayer() {
+        return new Player(UUID.randomUUID(), "test", new PlayerConnection() {
+            @Override
+            public void sendPacket(@NotNull SendablePacket packet) {
+
+            }
+
+            @Override
+            public @NotNull SocketAddress getRemoteAddress() {
+                return null;
+            }
+
+            @Override
+            public void disconnect() {
+
+            }
+        });
+    }
+
     private static String stripExtraSpaces(String s) {
         StringBuilder formattedString = new StringBuilder();
         java.util.StringTokenizer st = new java.util.StringTokenizer(s);
