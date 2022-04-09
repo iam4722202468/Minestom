@@ -1868,4 +1868,6 @@ interface Blocks {
     Block PEARLESCENT_FROGLIGHT = BlockImpl.get("minecraft:pearlescent_froglight");
 
     Block FROGSPAWN = BlockImpl.get("minecraft:frogspawn");
+
+    Block REINFORCED_DEEPSLATE = BlockImpl.get("minecraft:reinforced_deepslate");
 }

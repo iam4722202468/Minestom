@@ -5,6 +5,8 @@ package net.minestom.server.entity;
  */
 @SuppressWarnings("unused")
 interface EntityTypes {
+    EntityType ALLAY = EntityTypeImpl.get("minecraft:allay");
+
     EntityType AREA_EFFECT_CLOUD = EntityTypeImpl.get("minecraft:area_effect_cloud");
 
     EntityType ARMOR_STAND = EntityTypeImpl.get("minecraft:armor_stand");
@@ -20,6 +22,8 @@ interface EntityTypes {
     EntityType BLAZE = EntityTypeImpl.get("minecraft:blaze");
 
     EntityType BOAT = EntityTypeImpl.get("minecraft:boat");
+
+    EntityType CHEST_BOAT = EntityTypeImpl.get("minecraft:chest_boat");
 
     EntityType CAT = EntityTypeImpl.get("minecraft:cat");
 
@@ -210,6 +214,8 @@ interface EntityTypes {
     EntityType VINDICATOR = EntityTypeImpl.get("minecraft:vindicator");
 
     EntityType WANDERING_TRADER = EntityTypeImpl.get("minecraft:wandering_trader");
+
+    EntityType WARDEN = EntityTypeImpl.get("minecraft:warden");
 
     EntityType WITCH = EntityTypeImpl.get("minecraft:witch");
 

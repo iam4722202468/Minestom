@@ -5,6 +5,20 @@ package net.minestom.server.sound;
  */
 @SuppressWarnings("unused")
 interface SoundEvents {
+    SoundEvent ENTITY_ALLAY_AMBIENT_WITH_ITEM = SoundEventImpl.get("minecraft:entity.allay.ambient_with_item");
+
+    SoundEvent ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM = SoundEventImpl.get("minecraft:entity.allay.ambient_without_item");
+
+    SoundEvent ENTITY_ALLAY_DEATH = SoundEventImpl.get("minecraft:entity.allay.death");
+
+    SoundEvent ENTITY_ALLAY_FLAP = SoundEventImpl.get("minecraft:entity.allay.flap");
+
+    SoundEvent ENTITY_ALLAY_HURT = SoundEventImpl.get("minecraft:entity.allay.hurt");
+
+    SoundEvent ENTITY_ALLAY_ITEM_GIVEN = SoundEventImpl.get("minecraft:entity.allay.item_given");
+
+    SoundEvent ENTITY_ALLAY_ITEM_TAKEN = SoundEventImpl.get("minecraft:entity.allay.item_taken");
+
     SoundEvent AMBIENT_CAVE = SoundEventImpl.get("minecraft:ambient.cave");
 
     SoundEvent AMBIENT_BASALT_DELTAS_ADDITIONS = SoundEventImpl.get("minecraft:ambient.basalt_deltas.additions");
@@ -1623,6 +1637,8 @@ interface SoundEvents {
 
     SoundEvent ENTITY_PARROT_IMITATE_VINDICATOR = SoundEventImpl.get("minecraft:entity.parrot.imitate.vindicator");
 
+    SoundEvent ENTITY_PARROT_IMITATE_WARDEN = SoundEventImpl.get("minecraft:entity.parrot.imitate.warden");
+
     SoundEvent ENTITY_PARROT_IMITATE_WITCH = SoundEventImpl.get("minecraft:entity.parrot.imitate.witch");
 
     SoundEvent ENTITY_PARROT_IMITATE_WITHER = SoundEventImpl.get("minecraft:entity.parrot.imitate.wither");
@@ -1940,6 +1956,8 @@ interface SoundEvents {
     SoundEvent BLOCK_SCULK_SHRIEKER_HIT = SoundEventImpl.get("minecraft:block.sculk_shrieker.hit");
 
     SoundEvent BLOCK_SCULK_SHRIEKER_PLACE = SoundEventImpl.get("minecraft:block.sculk_shrieker.place");
+
+    SoundEvent BLOCK_SCULK_SHRIEKER_SHRIEK = SoundEventImpl.get("minecraft:block.sculk_shrieker.shriek");
 
     SoundEvent BLOCK_SCULK_SHRIEKER_STEP = SoundEventImpl.get("minecraft:block.sculk_shrieker.step");
 
@@ -2402,6 +2420,42 @@ interface SoundEvents {
     SoundEvent ENTITY_WANDERING_TRADER_TRADE = SoundEventImpl.get("minecraft:entity.wandering_trader.trade");
 
     SoundEvent ENTITY_WANDERING_TRADER_YES = SoundEventImpl.get("minecraft:entity.wandering_trader.yes");
+
+    SoundEvent ENTITY_WARDEN_AGITATED = SoundEventImpl.get("minecraft:entity.warden.agitated");
+
+    SoundEvent ENTITY_WARDEN_AMBIENT = SoundEventImpl.get("minecraft:entity.warden.ambient");
+
+    SoundEvent ENTITY_WARDEN_ANGRY = SoundEventImpl.get("minecraft:entity.warden.angry");
+
+    SoundEvent ENTITY_WARDEN_ATTACK_IMPACT = SoundEventImpl.get("minecraft:entity.warden.attack_impact");
+
+    SoundEvent ENTITY_WARDEN_DEATH = SoundEventImpl.get("minecraft:entity.warden.death");
+
+    SoundEvent ENTITY_WARDEN_DIG = SoundEventImpl.get("minecraft:entity.warden.dig");
+
+    SoundEvent ENTITY_WARDEN_EMERGE = SoundEventImpl.get("minecraft:entity.warden.emerge");
+
+    SoundEvent ENTITY_WARDEN_HEARTBEAT = SoundEventImpl.get("minecraft:entity.warden.heartbeat");
+
+    SoundEvent ENTITY_WARDEN_HURT = SoundEventImpl.get("minecraft:entity.warden.hurt");
+
+    SoundEvent ENTITY_WARDEN_LISTENING = SoundEventImpl.get("minecraft:entity.warden.listening");
+
+    SoundEvent ENTITY_WARDEN_LISTENING_ANGRY = SoundEventImpl.get("minecraft:entity.warden.listening_angry");
+
+    SoundEvent ENTITY_WARDEN_NEARBY_CLOSE = SoundEventImpl.get("minecraft:entity.warden.nearby_close");
+
+    SoundEvent ENTITY_WARDEN_NEARBY_CLOSER = SoundEventImpl.get("minecraft:entity.warden.nearby_closer");
+
+    SoundEvent ENTITY_WARDEN_NEARBY_CLOSEST = SoundEventImpl.get("minecraft:entity.warden.nearby_closest");
+
+    SoundEvent ENTITY_WARDEN_ROAR = SoundEventImpl.get("minecraft:entity.warden.roar");
+
+    SoundEvent ENTITY_WARDEN_SNIFF = SoundEventImpl.get("minecraft:entity.warden.sniff");
+
+    SoundEvent ENTITY_WARDEN_STEP = SoundEventImpl.get("minecraft:entity.warden.step");
+
+    SoundEvent ENTITY_WARDEN_TENDRIL_CLICKS = SoundEventImpl.get("minecraft:entity.warden.tendril_clicks");
 
     SoundEvent BLOCK_WATER_AMBIENT = SoundEventImpl.get("minecraft:block.water.ambient");
 

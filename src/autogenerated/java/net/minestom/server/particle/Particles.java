@@ -186,4 +186,8 @@ interface Particles {
     Particle ELECTRIC_SPARK = ParticleImpl.get("minecraft:electric_spark");
 
     Particle SCRAPE = ParticleImpl.get("minecraft:scrape");
+
+    Particle SHRIEK = ParticleImpl.get("minecraft:shriek");
+
+    Particle ALLAY_DUST = ParticleImpl.get("minecraft:allay_dust");
 }

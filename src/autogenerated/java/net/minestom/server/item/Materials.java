@@ -619,6 +619,8 @@ interface Materials {
 
     Material CHISELED_DEEPSLATE = MaterialImpl.get("minecraft:chiseled_deepslate");
 
+    Material REINFORCED_DEEPSLATE = MaterialImpl.get("minecraft:reinforced_deepslate");
+
     Material BROWN_MUSHROOM_BLOCK = MaterialImpl.get("minecraft:brown_mushroom_block");
 
     Material RED_MUSHROOM_BLOCK = MaterialImpl.get("minecraft:red_mushroom_block");
@@ -662,6 +664,8 @@ interface Materials {
     Material SCULK_VEIN = MaterialImpl.get("minecraft:sculk_vein");
 
     Material SCULK_CATALYST = MaterialImpl.get("minecraft:sculk_catalyst");
+
+    Material SCULK_SHRIEKER = MaterialImpl.get("minecraft:sculk_shrieker");
 
     Material ENCHANTING_TABLE = MaterialImpl.get("minecraft:enchanting_table");
 
@@ -1399,17 +1403,31 @@ interface Materials {
 
     Material OAK_BOAT = MaterialImpl.get("minecraft:oak_boat");
 
+    Material OAK_CHEST_BOAT = MaterialImpl.get("minecraft:oak_chest_boat");
+
     Material SPRUCE_BOAT = MaterialImpl.get("minecraft:spruce_boat");
+
+    Material SPRUCE_CHEST_BOAT = MaterialImpl.get("minecraft:spruce_chest_boat");
 
     Material BIRCH_BOAT = MaterialImpl.get("minecraft:birch_boat");
 
+    Material BIRCH_CHEST_BOAT = MaterialImpl.get("minecraft:birch_chest_boat");
+
     Material JUNGLE_BOAT = MaterialImpl.get("minecraft:jungle_boat");
+
+    Material JUNGLE_CHEST_BOAT = MaterialImpl.get("minecraft:jungle_chest_boat");
 
     Material ACACIA_BOAT = MaterialImpl.get("minecraft:acacia_boat");
 
+    Material ACACIA_CHEST_BOAT = MaterialImpl.get("minecraft:acacia_chest_boat");
+
     Material DARK_OAK_BOAT = MaterialImpl.get("minecraft:dark_oak_boat");
 
+    Material DARK_OAK_CHEST_BOAT = MaterialImpl.get("minecraft:dark_oak_chest_boat");
+
     Material MANGROVE_BOAT = MaterialImpl.get("minecraft:mangrove_boat");
+
+    Material MANGROVE_CHEST_BOAT = MaterialImpl.get("minecraft:mangrove_chest_boat");
 
     Material STRUCTURE_BLOCK = MaterialImpl.get("minecraft:structure_block");
 
@@ -1809,6 +1827,8 @@ interface Materials {
 
     Material GLISTERING_MELON_SLICE = MaterialImpl.get("minecraft:glistering_melon_slice");
 
+    Material ALLAY_SPAWN_EGG = MaterialImpl.get("minecraft:allay_spawn_egg");
+
     Material AXOLOTL_SPAWN_EGG = MaterialImpl.get("minecraft:axolotl_spawn_egg");
 
     Material BAT_SPAWN_EGG = MaterialImpl.get("minecraft:bat_spawn_egg");
@@ -1930,6 +1950,8 @@ interface Materials {
     Material VINDICATOR_SPAWN_EGG = MaterialImpl.get("minecraft:vindicator_spawn_egg");
 
     Material WANDERING_TRADER_SPAWN_EGG = MaterialImpl.get("minecraft:wandering_trader_spawn_egg");
+
+    Material WARDEN_SPAWN_EGG = MaterialImpl.get("minecraft:warden_spawn_egg");
 
     Material WITCH_SPAWN_EGG = MaterialImpl.get("minecraft:witch_spawn_egg");
 
@@ -2269,8 +2291,6 @@ interface Materials {
 
     Material POINTED_DRIPSTONE = MaterialImpl.get("minecraft:pointed_dripstone");
 
-    Material SCULK_SHRIEKER = MaterialImpl.get("minecraft:sculk_shrieker");
-
     Material OCHRE_FROGLIGHT = MaterialImpl.get("minecraft:ochre_froglight");
 
     Material VERDANT_FROGLIGHT = MaterialImpl.get("minecraft:verdant_froglight");
@@ -2278,4 +2298,8 @@ interface Materials {
     Material PEARLESCENT_FROGLIGHT = MaterialImpl.get("minecraft:pearlescent_froglight");
 
     Material FROGSPAWN = MaterialImpl.get("minecraft:frogspawn");
+
+    Material ECHO_SHARD = MaterialImpl.get("minecraft:echo_shard");
+
+    Material RECOVERY_COMPASS = MaterialImpl.get("minecraft:recovery_compass");
 }
