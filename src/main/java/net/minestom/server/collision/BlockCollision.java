@@ -187,11 +187,25 @@ final class BlockCollision {
         }
     }
 
+    private static Vec calculateToCheck(Vec pointBefore, Pos entityPosition, BoundingBox boundingBox, Vec off, @NotNull Vec velocity) {
+        Point firstBlock = boundingBox.relativeStart().add(entityPosition);
+
+        return new Vec(
+            pointBefore.x() - (firstBlock.blockX()) + 1 + Math.signum(velocity.x()) * off.x(),
+            pointBefore.y() - (firstBlock.blockY()) + 1 + Math.signum(velocity.y()) * off.y(),
+            pointBefore.z() - (firstBlock.blockZ()) + 1 + Math.signum(velocity.z()) * off.z()
+        );
+    }
+
     private static void fastPhysics(@NotNull BoundingBox boundingBox,
                                     @NotNull Vec velocity, Pos entityPosition,
                                     @NotNull Block.Getter getter,
                                     @NotNull Vec[] allFaces,
                                     @NotNull SweepResult finalResult) {
+
+        boolean[][][] map = boundingBox.getMap();
+
+        Vec toCheck;
         for (Vec point : allFaces) {
             final Vec pointBefore = point.add(entityPosition);
             final Vec pointAfter = point.add(entityPosition).add(velocity);
@@ -202,42 +216,78 @@ final class BlockCollision {
             // Checks can be limited by checking if we moved across an axis line
 
             // Pass through (0, 0, 0)
-            checkBoundingBox(pointBefore.blockX(), pointBefore.blockY(), pointBefore.blockZ(), velocity, entityPosition, boundingBox, getter, finalResult);
+            toCheck = calculateToCheck(pointBefore, entityPosition, boundingBox, Vec.ZERO, velocity);
+            if (!map[toCheck.blockX()][toCheck.blockY()][toCheck.blockZ()]) {
+                map[toCheck.blockX()][toCheck.blockY()][toCheck.blockZ()] = true;
+                checkBoundingBox(pointBefore.blockX(), pointBefore.blockY(), pointBefore.blockZ(), velocity, entityPosition, boundingBox, getter, finalResult);
+            }
 
             if (pointBefore.blockX() != pointAfter.blockX()) {
                 // Pass through (+1, 0, 0)
-                checkBoundingBox(pointAfter.blockX(), pointBefore.blockY(), pointBefore.blockZ(), velocity, entityPosition, boundingBox, getter, finalResult);
+                toCheck = calculateToCheck(pointBefore, entityPosition, boundingBox, new Vec(1, 0, 0), velocity);
+                if (!map[toCheck.blockX()][toCheck.blockY()][toCheck.blockZ()]) {
+                    map[toCheck.blockX()][toCheck.blockY()][toCheck.blockZ()] = true;
+                    checkBoundingBox(pointAfter.blockX(), pointBefore.blockY(), pointBefore.blockZ(), velocity, entityPosition, boundingBox, getter, finalResult);
+                }
 
                 // Checks for moving through 4 blocks
-                if (pointBefore.blockY() != pointAfter.blockY())
+                if (pointBefore.blockY() != pointAfter.blockY()) {
                     // Pass through (+1, +1, 0)
-                    checkBoundingBox(pointAfter.blockX(), pointAfter.blockY(), pointBefore.blockZ(), velocity, entityPosition, boundingBox, getter, finalResult);
+                    toCheck = calculateToCheck(pointBefore, entityPosition, boundingBox, new Vec(1, 1, 0), velocity);
+                    if (!map[toCheck.blockX()][toCheck.blockY()][toCheck.blockZ()]) {
+                        map[toCheck.blockX()][toCheck.blockY()][toCheck.blockZ()] = true;
+                        checkBoundingBox(pointAfter.blockX(), pointAfter.blockY(), pointBefore.blockZ(), velocity, entityPosition, boundingBox, getter, finalResult);
+                    }
+                }
 
-                if (pointBefore.blockZ() != pointAfter.blockZ())
+                if (pointBefore.blockZ() != pointAfter.blockZ()) {
                     // Pass through (+1, 0, +1)
-                    checkBoundingBox(pointAfter.blockX(), pointBefore.blockY(), pointAfter.blockZ(), velocity, entityPosition, boundingBox, getter, finalResult);
+                    toCheck = calculateToCheck(pointBefore, entityPosition, boundingBox, new Vec(1, 0, 1), velocity);
+                    if (!map[toCheck.blockX()][toCheck.blockY()][toCheck.blockZ()]) {
+                        map[toCheck.blockX()][toCheck.blockY()][toCheck.blockZ()] = true;
+                        checkBoundingBox(pointAfter.blockX(), pointBefore.blockY(), pointAfter.blockZ(), velocity, entityPosition, boundingBox, getter, finalResult);
+                    }
+                }
             }
 
             if (pointBefore.blockY() != pointAfter.blockY()) {
                 // Pass through (0, +1, 0)
-                checkBoundingBox(pointBefore.blockX(), pointAfter.blockY(), pointBefore.blockZ(), velocity, entityPosition, boundingBox, getter, finalResult);
+                toCheck = calculateToCheck(pointBefore, entityPosition, boundingBox, new Vec(0, 1, 0), velocity);
+                if (!map[toCheck.blockX()][toCheck.blockY()][toCheck.blockZ()]) {
+                    map[toCheck.blockX()][toCheck.blockY()][toCheck.blockZ()] = true;
+                    checkBoundingBox(pointBefore.blockX(), pointAfter.blockY(), pointBefore.blockZ(), velocity, entityPosition, boundingBox, getter, finalResult);
+                }
 
                 // Checks for moving through 4 blocks
-                if (pointBefore.blockZ() != pointAfter.blockZ())
+                if (pointBefore.blockZ() != pointAfter.blockZ()) {
                     // Pass through (0, +1, +1)
-                    checkBoundingBox(pointBefore.blockX(), pointAfter.blockY(), pointAfter.blockZ(), velocity, entityPosition, boundingBox, getter, finalResult);
+                    toCheck = calculateToCheck(pointBefore, entityPosition, boundingBox, new Vec(0, 1, 1), velocity);
+                    if (!map[toCheck.blockX()][toCheck.blockY()][toCheck.blockZ()]) {
+                        map[toCheck.blockX()][toCheck.blockY()][toCheck.blockZ()] = true;
+                        checkBoundingBox(pointBefore.blockX(), pointAfter.blockY(), pointAfter.blockZ(), velocity, entityPosition, boundingBox, getter, finalResult);
+                    }
+                }
             }
 
             if (pointBefore.blockZ() != pointAfter.blockZ()) {
                 // Pass through (0, 0, +1)
-                checkBoundingBox(pointBefore.blockX(), pointBefore.blockY(), pointAfter.blockZ(), velocity, entityPosition, boundingBox, getter, finalResult);
+                toCheck = calculateToCheck(pointBefore, entityPosition, boundingBox, new Vec(0, 0, 1), velocity);
+                if (!map[toCheck.blockX()][toCheck.blockY()][toCheck.blockZ()]) {
+                    map[toCheck.blockX()][toCheck.blockY()][toCheck.blockZ()] = true;
+                    checkBoundingBox(pointBefore.blockX(), pointBefore.blockY(), pointAfter.blockZ(), velocity, entityPosition, boundingBox, getter, finalResult);
+                }
             }
 
             // Pass through (+1, +1, +1)
             if (pointBefore.blockX() != pointAfter.blockX()
                     && pointBefore.blockY() != pointAfter.blockY()
-                    && pointBefore.blockZ() != pointAfter.blockZ())
-                checkBoundingBox(pointAfter.blockX(), pointAfter.blockY(), pointAfter.blockZ(), velocity, entityPosition, boundingBox, getter, finalResult);
+                    && pointBefore.blockZ() != pointAfter.blockZ()) {
+                toCheck = calculateToCheck(pointBefore, entityPosition, boundingBox, new Vec(1, 1, 1), velocity);
+                if (!map[toCheck.blockX()][toCheck.blockY()][toCheck.blockZ()]) {
+                    map[toCheck.blockX()][toCheck.blockY()][toCheck.blockZ()] = true;
+                    checkBoundingBox(pointAfter.blockX(), pointAfter.blockY(), pointAfter.blockZ(), velocity, entityPosition, boundingBox, getter, finalResult);
+                }
+            }
         }
     }
 

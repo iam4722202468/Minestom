@@ -8,6 +8,8 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+
 /**
  * See https://wiki.vg/Entity_metadata#Mobs_2
  */
@@ -17,6 +19,7 @@ public final class BoundingBox implements Shape {
     private static final BoundingBox smallBoundingBox = new BoundingBox(0.6, 0.6, 0.6);
 
     final static BoundingBox ZERO = new BoundingBox(0, 0, 0);
+    boolean map[][][] = new boolean[][][] {};
 
     private final double width, height, depth;
     private final Point offset;
@@ -27,6 +30,7 @@ public final class BoundingBox implements Shape {
         this.height = height;
         this.depth = depth;
         this.offset = offset;
+        map = new boolean[(int) (Math.ceil(width) + 3)][(int) Math.ceil(height) + 3][(int) Math.ceil(depth) + 3];
     }
 
     public BoundingBox(double width, double height, double depth) {
@@ -170,5 +174,13 @@ public final class BoundingBox implements Shape {
             case SNEAKING -> sneakingBoundingBox;
             default -> null;
         };
+    }
+
+    boolean[][][] getMap() {
+        for (var i : map)
+            for (var j : i)
+                Arrays.fill(j, false);
+
+        return map;
     }
 }
