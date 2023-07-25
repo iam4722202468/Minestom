@@ -27,11 +27,15 @@ public class PNode {
     double h;
     PNode parent;
     Pos point;
-    final int hashCode;
+    int hashCode;
+
+    int cantor(int a, int b) {
+        return (a + b + 1) * (a + b) / 2 + b;
+    }
 
     private PNode tempNode = null;
 
-    private NodeType type = NodeType.WALK;
+    private NodeType type;
 
     void setType(NodeType newType) {
         this.type = newType;
@@ -41,12 +45,13 @@ public class PNode {
         return type;
     }
 
+    private void setPoint(Pos point) {
+        this.point = point;
+        this.hashCode = cantor(point.blockX(), cantor(point.blockY(), point.blockZ()));
+    }
+
     public PNode(Pos point, double g, double h, PNode parent) {
-        this.point = new Pos(point.x(), point.y(), point.z());
-        this.g = g;
-        this.h = h;
-        this.parent = parent;
-        this.hashCode = point.hashCode();
+        this(point, g, h, NodeType.WALK, parent);
     }
 
     public PNode(Pos point, double g, double h, NodeType type, PNode parent) {
@@ -54,7 +59,7 @@ public class PNode {
         this.g = g;
         this.h = h;
         this.parent = parent;
-        this.hashCode = point.hashCode();
+        this.hashCode = cantor(point.blockX(), cantor(point.blockY(), point.blockZ()));
         this.type = type;
     }
 
@@ -68,7 +73,7 @@ public class PNode {
         if (obj == null) return false;
         if (obj == this) return true;
         if (!(obj instanceof PNode other)) return false;
-        return this.point.samePoint(other.point);
+        return this.hashCode == other.hashCode;
     }
 
     public Collection<? extends PNode> getNearby(Instance instance, Set<PNode> closed, Point goal, @NotNull BoundingBox boundingBox) {
@@ -121,11 +126,14 @@ public class PNode {
     private PNode createJump(Instance instance, Pos point, BoundingBox boundingBox, double cost, Pos start, Point goal, Set<PNode> closed) {
         if (point.y() - start.y() == 0) return null;
         if (point.y() - start.y() > 2) return null;
+        if (point.blockX() != start.blockX() && point.blockZ() != start.blockZ()) return null;
+
+        var n = newNode(cost, point, goal);
+        if (closed.contains(n)) return null;
 
         if (pointInvalid(instance, point, boundingBox)) return null;
         if (pointInvalid(instance, start.add(0, 1, 0), boundingBox)) return null;
 
-        var n = newNode(cost, point, goal);
         n.setType(NodeType.JUMP);
         return n;
     }
@@ -145,7 +153,7 @@ public class PNode {
     private PNode newNode(double cost, Pos point, Point goal) {
         tempNode.g = g + cost;
         tempNode.h = PathGenerator.heuristic(point, goal);
-        tempNode.point = point;
+        tempNode.setPoint(point);
 
         var newNode = tempNode;
         tempNode = new PNode(Pos.ZERO, 0, 0, this);

@@ -46,6 +46,10 @@ public final class Navigator {
         }
     }
 
+    public PPath.PathState getState() {
+        return path.getState();
+    }
+
     /**
      * Used to move the entity toward {@code direction} in the X and Z axis
      * Gravity is still applied but the entity will not attempt to jump
@@ -125,6 +129,10 @@ public final class Navigator {
             return false;
         }
 
+        if (this.path != null) {
+            this.path.setState(PPath.PathState.TERMINATING);
+        }
+
         final Instance instance = entity.getInstance();
         if (point == null) {
             this.path = null;
@@ -179,7 +187,6 @@ public final class Navigator {
         if (path.getState() != PPath.PathState.FOLLOWING) return;
 
         if (this.entity.getPosition().distance(goalPosition) < minimumDistance) {
-            System.out.println("Ticking pathfinder");
             path.runComplete();
             path = null;
 
@@ -205,7 +212,7 @@ public final class Navigator {
             jump(4.0f);
         }
 
-        drawPath(path);
+        // drawPath(path);
 
         if (entity.getPosition().sameBlock(currentTarget)) path.next();
     }
@@ -224,6 +231,7 @@ public final class Navigator {
     }
 
     public void reset() {
+        if (this.path != null) this.path.setState(PPath.PathState.TERMINATING);
         this.goalPosition = null;
         this.path = null;
     }

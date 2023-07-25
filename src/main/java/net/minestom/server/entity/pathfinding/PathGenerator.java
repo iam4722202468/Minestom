@@ -1,15 +1,19 @@
 package net.minestom.server.entity.pathfinding;
 
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashBigSet;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class PathGenerator {
+    private static final ExecutorService pool = Executors.newWorkStealingPool();
     private static final PNode repathNode = new PNode(Pos.ZERO, 0, 0, PNode.NodeType.REPATH, null);
 
     public static double heuristic (Point node, Point target) {
@@ -24,13 +28,12 @@ public class PathGenerator {
         if (start == null || target == null) return null;
 
         PPath path = new PPath(start, instance, boundingBox, maxDistance, pathVariance, onComplete);
-        computePath(instance, start, target, closeDistance, maxDistance, pathVariance, boundingBox, path);
+        pool.submit(() -> computePath(instance, start, target, closeDistance, maxDistance, pathVariance, boundingBox, path));
 
         return path;
     }
 
     private static void computePath(Instance instance, Pos start, Pos target, double closeDistance, double maxDistance, double pathVariance, BoundingBox boundingBox, PPath path) {
-        Set<PNode> closed = new HashSet<>();
         double closestDistance = Double.MAX_VALUE;
         double straightDistance = heuristic(start, target);
         int maxSize = (int) Math.floor(maxDistance * 10);
@@ -43,7 +46,14 @@ public class PathGenerator {
         ObjectHeapPriorityQueue<PNode> open = new ObjectHeapPriorityQueue<>(pNodeComparator);
         open.enqueue(pStart);
 
+        Set<PNode> closed = new ObjectOpenHashBigSet<>(maxSize);
+
         while (!open.isEmpty() && closed.size() < maxSize) {
+            if (path.getState() == PPath.PathState.TERMINATING) {
+                path.setState(PPath.PathState.TERMINATED);
+                return;
+            }
+
             PNode current = open.dequeue();
 
             var chunk = instance.getChunkAt(current.point);
@@ -101,6 +111,5 @@ public class PathGenerator {
 
     private static boolean withinDistance(Pos point, Pos target, double closeDistance) {
         return point.distanceSquared(target) < (closeDistance * closeDistance);
-
     }
 }

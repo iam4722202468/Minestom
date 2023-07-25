@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 @EnvTest
 public class PathfinderIntegrationTest {
@@ -162,4 +162,31 @@ public class PathfinderIntegrationTest {
         assert(nav.getNodes() != null);
         validateNodes(nav.getNodes(), i);
     }
+
+    // @Test
+    // public void noPathFar(Env env) {
+    //     var i = env.createFlatInstance();
+    //     i.getWorldBorder().setCenter(0, 0);
+    //     i.getWorldBorder().setDiameter(10000);
+
+    //     ChunkUtils.forChunksInRange(0, 0,  100, (x, z) -> {
+    //         i.loadChunk(x, z).join();
+    //     });
+
+    //     var zombie = new LivingEntity(EntityType.ZOMBIE);
+    //     zombie.setInstance(i, new Pos(0, 40, 0));
+    //     zombie.setBoundingBox(zombie.getBoundingBox().expand(4f, 4f, 4f));
+
+    //     var navigator = new Navigator(zombie);
+
+    //     var startTime = System.currentTimeMillis();
+    //     navigator.setPathTo(new Pos(0, 600, 500), 1, 500, 500, (v) -> {});
+
+    //     while (navigator.getState() == PPath.PathState.CALCULATING) {
+    //     }
+
+    //     var endTime = System.currentTimeMillis();
+
+    //     System.out.println("Time: " + (endTime - startTime));
+    // }
 }

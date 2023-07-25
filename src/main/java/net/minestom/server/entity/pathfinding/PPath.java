@@ -20,16 +20,16 @@ public class PPath {
     private final double maxDistance;
     private int index = 0;
     private final Pos initialPosition;
-    private final AtomicReference<PathState> state = new AtomicReference<>(PathState.COMPUTING);
+    private final AtomicReference<PathState> state = new AtomicReference<>(PathState.CALCULATING);
 
     public void setState(PathState newState) {
         state.set(newState);
     }
 
     enum PathState {
-        COMPUTING,
+        CALCULATING,
         FOLLOWING,
-        INVALID
+        TERMINATING, TERMINATED, INVALID
     }
 
     PathState getState() {
