@@ -22,10 +22,14 @@ public class PPath {
     private final Pos initialPosition;
     private final AtomicReference<PathState> state = new AtomicReference<>(PathState.COMPUTING);
 
+    public void setState(PathState newState) {
+        state.set(newState);
+    }
+
     enum PathState {
         COMPUTING,
         FOLLOWING,
-        COMPLETED
+        INVALID
     }
 
     PathState getState() {

@@ -23,11 +23,13 @@ public class PNode {
         REPATH
     }
 
-    final double g;
-    final double h;
+    double g;
+    double h;
     PNode parent;
-    final Pos point;
+    Pos point;
     final int hashCode;
+
+    private PNode tempNode = null;
 
     private NodeType type = NodeType.WALK;
 
@@ -71,6 +73,7 @@ public class PNode {
 
     public Collection<? extends PNode> getNearby(Instance instance, Set<PNode> closed, Point goal, @NotNull BoundingBox boundingBox) {
         Collection<PNode> nearby = new ArrayList<>();
+        tempNode = new PNode(Pos.ZERO, 0, 0, this);
 
         int stepSize = (int) Math.max(Math.floor(boundingBox.width() / 2), 1);
         if (stepSize < 1) stepSize = 1;
@@ -140,7 +143,14 @@ public class PNode {
     }
 
     private PNode newNode(double cost, Pos point, Point goal) {
-        return new PNode(point, g+cost, PathGenerator.heuristic(point, goal), this);
+        tempNode.g = g + cost;
+        tempNode.h = PathGenerator.heuristic(point, goal);
+        tempNode.point = point;
+
+        var newNode = tempNode;
+        tempNode = new PNode(Pos.ZERO, 0, 0, this);
+
+        return newNode;
     }
 
     static Pos gravitySnap(Instance instance, Point point, BoundingBox boundingBox, double maxFall) {

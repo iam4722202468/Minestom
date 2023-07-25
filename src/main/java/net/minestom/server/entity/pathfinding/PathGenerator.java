@@ -18,22 +18,26 @@ public class PathGenerator {
 
     static Comparator<PNode> pNodeComparator = (s1, s2) -> (int) (((s1.g + s1.h) - (s2.g + s2.h)) * 1000);
     public static PPath generate(Instance instance, Pos orgStart, Point orgTarget, double closeDistance, double maxDistance, double pathVariance, BoundingBox boundingBox, Consumer<Void> onComplete) {
-        closeDistance = Math.max(0.8, closeDistance);
-
         Pos start = PNode.gravitySnap(instance, orgStart, boundingBox, 100);
         Pos target = PNode.gravitySnap(instance, orgTarget.withX(orgTarget.blockX() + 0.5).withZ(orgTarget.blockZ() + 0.5), boundingBox, 100);
 
-        List<PNode> closestFoundNodes = List.of();
-        double closestDistance = Double.MAX_VALUE;
-
         if (start == null || target == null) return null;
 
-        double straightDistance = heuristic(start, target);
-
         PPath path = new PPath(start, instance, boundingBox, maxDistance, pathVariance, onComplete);
-        Set<PNode> closed = new HashSet<>();
+        computePath(instance, start, target, closeDistance, maxDistance, pathVariance, boundingBox, path);
 
+        return path;
+    }
+
+    private static void computePath(Instance instance, Pos start, Pos target, double closeDistance, double maxDistance, double pathVariance, BoundingBox boundingBox, PPath path) {
+        Set<PNode> closed = new HashSet<>();
+        double closestDistance = Double.MAX_VALUE;
+        double straightDistance = heuristic(start, target);
         int maxSize = (int) Math.floor(maxDistance * 10);
+
+        closeDistance = Math.max(0.8, closeDistance);
+        List<PNode> closestFoundNodes = List.of();
+
         PNode pStart = new PNode(start, 0, heuristic(start, target), PNode.NodeType.WALK, null);
 
         ObjectHeapPriorityQueue<PNode> open = new ObjectHeapPriorityQueue<>(pNodeComparator);
@@ -69,7 +73,11 @@ public class PathGenerator {
         PNode current = open.isEmpty() ? null : open.dequeue();
 
         if (current == null || open.isEmpty() || !withinDistance(current.point, target, closeDistance)) {
-            if (closestFoundNodes.size() == 0) return null;
+            if (closestFoundNodes.size() == 0) {
+                path.setState(PPath.PathState.INVALID);
+                return;
+            }
+
             current = closestFoundNodes.get(closestFoundNodes.size() - 1);
 
             if (!open.isEmpty()) {
@@ -88,7 +96,7 @@ public class PathGenerator {
         PNode pEnd = new PNode(target, 0, 0, PNode.NodeType.WALK, null);
         path.getNodes().add(pEnd);
 
-        return path;
+        path.setState(PPath.PathState.FOLLOWING);
     }
 
     private static boolean withinDistance(Pos point, Pos target, double closeDistance) {

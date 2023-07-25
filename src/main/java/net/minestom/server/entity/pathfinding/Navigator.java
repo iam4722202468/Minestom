@@ -166,8 +166,6 @@ public final class Navigator {
                 pathVariance,
                 this.entity.getBoundingBox(), onComplete);
 
-        System.out.println(this.path);
-
         final boolean success = path != null;
         this.goalPosition = success ? point : null;
         return success;
@@ -178,6 +176,7 @@ public final class Navigator {
         if (goalPosition == null) return; // No path
         if (entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) return; // No pathfinding tick for dead entities
         if (path == null) return;
+        if (path.getState() != PPath.PathState.FOLLOWING) return;
 
         if (this.entity.getPosition().distance(goalPosition) < minimumDistance) {
             System.out.println("Ticking pathfinder");
@@ -190,8 +189,6 @@ public final class Navigator {
         Point currentTarget = path.getCurrent();
 
         if (currentTarget == null || path.getCurrentType() == PNode.NodeType.REPATH || path.getCurrentType() == null) {
-            System.out.println("Repathing");
-
             path = PathGenerator.generate(entity.getInstance(),
                     entity.getPosition(),
                     Pos.fromPoint(goalPosition),
