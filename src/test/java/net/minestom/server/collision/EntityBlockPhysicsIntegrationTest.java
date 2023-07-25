@@ -338,9 +338,7 @@ public class EntityBlockPhysicsIntegrationTest {
         entity.setInstance(instance, new Pos(-0.3, 42, -0.3)).join();
         assertEquals(instance, entity.getInstance());
 
-        PhysicsResult res = CollisionUtils.handlePhysics(entity, new Vec(0, 0, -10));
-
-        System.out.println(res.newPosition());
+        PhysicsResult res = CollisionUtils.handlePhysics(entity, new Vec(10, 0, -10));
 
         assertEqualsPoint(new Pos(4.7, 42, -10.3), res.newPosition());
     }

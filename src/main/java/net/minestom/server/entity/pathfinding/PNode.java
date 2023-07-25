@@ -25,7 +25,7 @@ public class PNode {
 
     final double g;
     final double h;
-    final PNode parent;
+    PNode parent;
     final Pos point;
     final int hashCode;
 
@@ -45,6 +45,15 @@ public class PNode {
         this.h = h;
         this.parent = parent;
         this.hashCode = point.hashCode();
+    }
+
+    public PNode(Pos point, double g, double h, NodeType type, PNode parent) {
+        this.point = new Pos(point.x(), point.y(), point.z());
+        this.g = g;
+        this.h = h;
+        this.parent = parent;
+        this.hashCode = point.hashCode();
+        this.type = type;
     }
 
     @Override
@@ -79,12 +88,12 @@ public class PNode {
 
                 if (floorPoint == null) continue;
 
-                var nodeWalk = createWalk(instance, floorPoint, boundingBox, cost, point, goal);
+                var nodeWalk = createWalk(instance, floorPoint, boundingBox, cost, point, goal, closed);
                 if (nodeWalk != null && !closed.contains(nodeWalk)) nearby.add(nodeWalk);
 
                 if (jumpPoint == null) continue;
                 if (!floorPoint.sameBlock(jumpPoint)) {
-                    var nodeJump = createJump(instance, jumpPoint, boundingBox, cost, point, goal);
+                    var nodeJump = createJump(instance, jumpPoint, boundingBox, cost, point, goal, closed);
                     if (nodeJump != null && !closed.contains(nodeJump)) nearby.add(nodeJump);
                 }
             }
@@ -93,22 +102,20 @@ public class PNode {
         return nearby;
     }
 
-    private PNode createWalk(Instance instance, Pos point, BoundingBox boundingBox, double cost, Pos start, Point goal) {
-        if (pointInvalid(instance, point, boundingBox)) return null;
-
+    private PNode createWalk(Instance instance, Pos point, BoundingBox boundingBox, double cost, Pos start, Point goal, Set<PNode> closed) {
         var n = newNode(cost, point, goal);
-        if (point.y() < start.y()) {
-            n.setType(NodeType.FALL);
+        if (closed.contains(n)) return null;
 
+        if (point.y() < start.y()) {
             if (!canMoveTowards(instance, start, point.withY(start.y()), boundingBox)) return null;
-            if (pointInvalid(instance, point.withY(start.y()), boundingBox)) return null;
+            n.setType(NodeType.FALL);
         } else {
             if (!canMoveTowards(instance, start, point, boundingBox)) return null;
         }
         return n;
     }
 
-    private PNode createJump(Instance instance, Pos point, BoundingBox boundingBox, double cost, Pos start, Point goal) {
+    private PNode createJump(Instance instance, Pos point, BoundingBox boundingBox, double cost, Pos start, Point goal, Set<PNode> closed) {
         if (point.y() - start.y() == 0) return null;
         if (point.y() - start.y() > 2) return null;
 
@@ -122,18 +129,6 @@ public class PNode {
 
     private boolean pointInvalid(Instance instance, Pos point, BoundingBox boundingBox) {
         var iterator = boundingBox.getBlocks(point);
-        while (iterator.hasNext()) {
-            var block = iterator.next();
-            if (instance.getBlock(block, Block.Getter.Condition.TYPE).isSolid()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private boolean ceilInvalid(Instance instance, Pos point, BoundingBox boundingBox) {
-        var iterator = boundingBox.getBlocks(point, BoundingBox.AxisMask.Y, boundingBox.height());
         while (iterator.hasNext()) {
             var block = iterator.next();
             if (instance.getBlock(block, Block.Getter.Condition.TYPE).isSolid()) {
@@ -169,13 +164,8 @@ public class PNode {
     private static boolean canMoveTowards(Instance instance, Pos start, Point end, BoundingBox boundingBox) {
         Point diff = end.sub(start);
         PhysicsResult res = CollisionUtils.handlePhysics(instance, instance.getChunkAt(start), boundingBox, start, Vec.fromPoint(diff), null, false);
+        // res = CollisionUtils.handlePhysics(instance, instance.getChunkAt(start), boundingBox, res.newPosition(), Vec.fromPoint(diff), res, false);
         return !res.collisionZ() && !res.collisionY() && !res.collisionX();
-    }
-
-    static Pos moveTowards(Instance instance, Pos start, Point end, BoundingBox boundingBox) {
-        Point diff = end.sub(start);
-        PhysicsResult res = CollisionUtils.handlePhysics(instance, instance.getChunkAt(start), boundingBox, start, Vec.fromPoint(diff), null, false);
-        return res.newPosition();
     }
 
     @Override

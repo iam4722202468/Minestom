@@ -1,5 +1,6 @@
 package net.minestom.server.entity.pathfinding;
 
+import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -9,6 +10,8 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class PathGenerator {
+    private static final PNode repathNode = new PNode(Pos.ZERO, 0, 0, PNode.NodeType.REPATH, null);
+
     public static double heuristic (Point node, Point target) {
         return node.distance(target);
     }
@@ -30,14 +33,14 @@ public class PathGenerator {
         PPath path = new PPath(start, instance, boundingBox, maxDistance, pathVariance, onComplete);
         Set<PNode> closed = new HashSet<>();
 
-        int maxSize = (int) Math.floor(maxDistance * 5);
-        PNode pStart = new PNode(start, 0, heuristic(start, target), null);
+        int maxSize = (int) Math.floor(maxDistance * 10);
+        PNode pStart = new PNode(start, 0, heuristic(start, target), PNode.NodeType.WALK, null);
 
-        TreeSet<PNode> open = new TreeSet<>(pNodeComparator);
-        open.add(pStart);
+        ObjectHeapPriorityQueue<PNode> open = new ObjectHeapPriorityQueue<>(pNodeComparator);
+        open.enqueue(pStart);
 
         while (!open.isEmpty() && closed.size() < maxSize) {
-            PNode current = open.pollFirst();
+            PNode current = open.dequeue();
 
             var chunk = instance.getChunkAt(current.point);
             if (chunk == null) continue;
@@ -45,7 +48,10 @@ public class PathGenerator {
 
             if (((current.g + current.h) - straightDistance) > pathVariance) continue;
             if (!withinDistance(current.point, start, maxDistance)) continue;
-            if (withinDistance(current.point, target, closeDistance)) break;
+            if (withinDistance(current.point, target, closeDistance)) {
+                open.enqueue(current);
+                break;
+            }
 
             if (current.h < closestDistance) {
                 closestDistance = current.h;
@@ -54,17 +60,22 @@ public class PathGenerator {
 
             current.getNearby(instance, closed, target, boundingBox).forEach(p -> {
                 if (p.point.distance(start) <= maxDistance) {
-                    open.add(p);
+                    open.enqueue(p);
                     closed.add(p);
                 }
             });
         }
 
-        PNode current = open.pollFirst();
+        PNode current = open.isEmpty() ? null : open.dequeue();
 
         if (current == null || open.isEmpty() || !withinDistance(current.point, target, closeDistance)) {
             if (closestFoundNodes.size() == 0) return null;
             current = closestFoundNodes.get(closestFoundNodes.size() - 1);
+
+            if (!open.isEmpty()) {
+                repathNode.parent = current;
+                current = repathNode;
+            }
         }
 
         while (current.parent != null) {
@@ -74,7 +85,7 @@ public class PathGenerator {
 
         Collections.reverse(path.getNodes());
 
-        PNode pEnd = new PNode(target, 0, 0, null);
+        PNode pEnd = new PNode(target, 0, 0, PNode.NodeType.WALK, null);
         path.getNodes().add(pEnd);
 
         return path;

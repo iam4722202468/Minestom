@@ -36,9 +36,14 @@ public final class Navigator {
     private PPath path;
     private final Cooldown jumpCooldown = new Cooldown(Duration.of(20, TimeUnit.SERVER_TICK));
     private double minimumDistance;
+    private float movementSpeed = 0.1f;
 
     public Navigator(@NotNull Entity entity) {
         this.entity = entity;
+
+        if (entity instanceof LivingEntity living) {
+            movementSpeed = living.getAttribute(Attribute.MOVEMENT_SPEED).getBaseValue();
+        }
     }
 
     /**
@@ -61,14 +66,32 @@ public final class Navigator {
         }
         final double radians = Math.atan2(dz, dx);
         final double speedX = Math.cos(radians) * speed;
-        final double speedY = dy * speed;
+        final double speedY = Math.min(dy * speed, 0.3);
         final double speedZ = Math.sin(radians) * speed;
         final float yaw = PositionUtils.getLookYaw(dx, dz);
         final float pitch = PositionUtils.getLookPitch(dx, dy, dz);
+
         // Prevent ghosting
         final var physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, speedY, speedZ));
 
-        this.entity.refreshPosition(Pos.fromPoint(physicsResult.newPosition()).withView(yaw, pitch));
+        var currentYaw = entity.getPosition().yaw();
+
+        // if difference between current yaw and target yaw is greater than 30 degrees, we need to rotate
+        var a = currentYaw - yaw;
+        a = (a + 180) % 360 - 180;
+
+        double minDiff = 30;
+
+        if (Math.abs(a) > minDiff) {
+            // rotate
+            if (a > 0) currentYaw -= minDiff;
+            else currentYaw += minDiff;
+        } else {
+            // set yaw to target yaw
+            currentYaw = yaw;
+        }
+
+        this.entity.refreshPosition(Pos.fromPoint(physicsResult.newPosition()).withView(currentYaw, pitch));
     }
 
     public void jump(float height) {
@@ -83,7 +106,7 @@ public final class Navigator {
     }
 
     public synchronized boolean setPathTo(@Nullable Point point, double minimumDistance, Consumer<Void> onComplete) {
-        return setPathTo(point, minimumDistance, 500, 20, onComplete);
+        return setPathTo(point, minimumDistance, 50, 10, onComplete);
     }
 
     /**
@@ -131,7 +154,7 @@ public final class Navigator {
             return false;
         }
 
-        if (goalPosition != null && point.distance(goalPosition) < 1) {
+        if (goalPosition != null && point.sameBlock(goalPosition)) {
             if (onComplete != null) onComplete.accept(null);
             return false;
         }
@@ -142,6 +165,8 @@ public final class Navigator {
                 minimumDistance, maxDistance,
                 pathVariance,
                 this.entity.getBoundingBox(), onComplete);
+
+        System.out.println(this.path);
 
         final boolean success = path != null;
         this.goalPosition = success ? point : null;
@@ -155,6 +180,7 @@ public final class Navigator {
         if (path == null) return;
 
         if (this.entity.getPosition().distance(goalPosition) < minimumDistance) {
+            System.out.println("Ticking pathfinder");
             path.runComplete();
             path = null;
 
@@ -162,9 +188,10 @@ public final class Navigator {
         }
 
         Point currentTarget = path.getCurrent();
-        float movementSpeed = 0.1f;
 
         if (currentTarget == null || path.getCurrentType() == PNode.NodeType.REPATH || path.getCurrentType() == null) {
+            System.out.println("Repathing");
+
             path = PathGenerator.generate(entity.getInstance(),
                     entity.getPosition(),
                     Pos.fromPoint(goalPosition),
@@ -174,18 +201,14 @@ public final class Navigator {
             return;
         }
 
-        if (entity instanceof LivingEntity living) {
-            movementSpeed = living.getAttribute(Attribute.MOVEMENT_SPEED).getBaseValue();
-        }
-
         moveTowards(currentTarget, movementSpeed);
 
-        if ((path.getCurrentType() == PNode.NodeType.JUMP || currentTarget.y() > entity.getPosition().y() + 0.1) && jumpCooldown.isReady(tick)) {
+        if ((path.getCurrentType() == PNode.NodeType.JUMP || currentTarget.y() > entity.getPosition().y() + 0.1) && entity.isOnGround()) {
             jumpCooldown.refreshLastUpdate(tick);
-            jump(3.5f);
+            jump(4.0f);
         }
 
-        // drawPath(path);
+        drawPath(path);
 
         if (entity.getPosition().sameBlock(currentTarget)) path.next();
     }

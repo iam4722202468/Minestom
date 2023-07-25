@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @EnvTest
 public class PathfinderIntegrationTest {
@@ -102,8 +102,8 @@ public class PathfinderIntegrationTest {
 
     @Test
     public void testPFNodeEqual(Env env) {
-        PNode node1 = new PNode(new Pos(0.777, 0, 0), 2, 0, null);
-        PNode node2 = new PNode(new Pos(0.777, 0, 0), 0, 3, node1);
+        PNode node1 = new PNode(new Pos(0.777, 0, 0), 2, 0, PNode.NodeType.WALK, null);
+        PNode node2 = new PNode(new Pos(0.777, 0, 0), 0, 3, PNode.NodeType.WALK, node1);
 
         Set<PNode> nodes = new HashSet<>();
         nodes.add(node1);

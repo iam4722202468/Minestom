@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class PPath {
@@ -19,6 +20,17 @@ public class PPath {
     private final double maxDistance;
     private int index = 0;
     private final Pos initialPosition;
+    private final AtomicReference<PathState> state = new AtomicReference<>(PathState.COMPUTING);
+
+    enum PathState {
+        COMPUTING,
+        FOLLOWING,
+        COMPLETED
+    }
+
+    PathState getState() {
+        return state.get();
+    }
 
     public List<PNode> getNodes() {
         return nodes;
@@ -58,22 +70,6 @@ public class PPath {
     void next() {
         if (index >= nodes.size()) return;
         index++;
-    }
-
-    void fixJumps() {
-        for (int i = 0; i < nodes.size(); i++) {
-            var node = nodes.get(i);
-
-            if (node.getType() == PNode.NodeType.JUMP || node.getType() == PNode.NodeType.FALL) {
-                Pos previous = i > 0 ? nodes.get(i - 1).point : initialPosition;
-                Pos moved = PNode.moveTowards(instance, previous, node.point, boundingBox);
-
-                var toInsert = new PNode(moved, node.g, node.h, null);
-                toInsert.setType(node.getType());
-                nodes.add(i, toInsert);
-                i++;
-            }
-        }
     }
 
     double maxDistance() {

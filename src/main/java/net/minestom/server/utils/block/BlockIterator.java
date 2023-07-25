@@ -57,7 +57,7 @@ public class BlockIterator implements Iterator<Point> {
 
         if (maxDistance != 0) end = start.add(direction.normalize().mul(maxDistance));
         else end = null;
-        
+
         if (direction.isZero()) this.foundEnd = true;
 
         this.smooth = smooth;
@@ -78,21 +78,17 @@ public class BlockIterator implements Iterator<Point> {
         deltaDistZ = (ray.z() == 0) ? 1e30 : Math.abs(1 / ray.z());        // This works by calculating and storing the distance to the next grid intersection on the x, y and z axis
 
         //calculate step and initial sideDist
-        if (ray.x() < 0) {
-            sideDistX = (start.x() - mapX) * deltaDistX;
-        } else {
-            sideDistX = (mapX + 1.0 - start.x()) * deltaDistX;
-        }
-        if (ray.y() < 0) {
-            sideDistY = (start.y() - mapY) * deltaDistY;
-        } else {
-            sideDistY = (mapY + 1.0 - start.y()) * deltaDistY;
-        }
-        if (ray.z() < 0) {
-            sideDistZ = (start.z() - mapZ) * deltaDistZ;
-        } else {
-            sideDistZ = (mapZ + 1.0 - start.z()) * deltaDistZ;
-        }
+        if (ray.x() < 0) sideDistX = (start.x() - mapX) * deltaDistX;
+        else if (ray.x() > 0) sideDistX = (mapX + signums[0] - start.x()) * deltaDistX;
+        else sideDistX = Double.MAX_VALUE;
+
+        if (ray.y() < 0) sideDistY = (start.y() - mapY) * deltaDistY;
+        else if (ray.y() > 0) sideDistY = (mapY + signums[1] - start.y()) * deltaDistY;
+        else sideDistY = Double.MAX_VALUE;
+
+        if (ray.z() < 0) sideDistZ = (start.z() - mapZ) * deltaDistZ;
+        else if (ray.z() > 0) sideDistZ = (mapZ + signums[2] - start.z()) * deltaDistZ;
+        else sideDistZ = Double.MAX_VALUE;
     }
 
     /**
@@ -215,9 +211,9 @@ public class BlockIterator implements Iterator<Point> {
         if (end != null && current.sameBlock(end)) foundEnd = true;
 
         double closest = Math.min(sideDistX, Math.min(sideDistY, sideDistZ));
-        boolean needsX = sideDistX - closest < 1e-10;
-        boolean needsY = sideDistY - closest < 1e-10;
-        boolean needsZ = sideDistZ - closest < 1e-10;
+        boolean needsX = sideDistX - closest < 1e-10 && signums[0] != 0;
+        boolean needsY = sideDistY - closest < 1e-10 && signums[1] != 0;
+        boolean needsZ = sideDistZ - closest < 1e-10 && signums[2] != 0;
 
         if (needsZ) {
             sideDistZ += deltaDistZ;
@@ -235,8 +231,13 @@ public class BlockIterator implements Iterator<Point> {
         }
 
         if (needsX && needsY && needsZ) {
-            extraPoints.add(new Vec(signums[0] + current.x(), current.y(), current.z()));
+            extraPoints.add(new Vec(signums[0] + current.x(), signums[1] + current.y(), current.z()));
             if (smooth) return current;
+
+            extraPoints.add(new Vec(current.x(), signums[1] + current.y(), signums[2] + current.z()));
+            extraPoints.add(new Vec(signums[0] + current.x(), current.y(), signums[2] + current.z()));
+
+            extraPoints.add(new Vec(signums[0] + current.x(), current.y(), current.z()));
             extraPoints.add(new Vec(current.x(), signums[1] + current.y(), current.z()));
             extraPoints.add(new Vec(current.x(), current.y(), signums[2] + current.z()));
         } else if (needsX && needsY) {
