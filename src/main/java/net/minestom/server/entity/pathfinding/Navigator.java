@@ -212,7 +212,7 @@ public final class Navigator {
             jump(4.0f);
         }
 
-        drawPath(path);
+        // drawPath(path);
 
         if (entity.getPosition().sameBlock(currentTarget)) path.next();
     }
