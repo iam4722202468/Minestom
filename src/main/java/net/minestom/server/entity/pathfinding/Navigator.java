@@ -78,24 +78,24 @@ public final class Navigator {
         // Prevent ghosting
         final var physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, speedY, speedZ));
 
-        var currentYaw = entity.getPosition().yaw();
+        // var currentYaw = entity.getPosition().yaw();
 
-        // if difference between current yaw and target yaw is greater than 30 degrees, we need to rotate
-        var a = currentYaw - yaw;
-        a = (a + 180) % 360 - 180;
+        // // if difference between current yaw and target yaw is greater than 30 degrees, we need to rotate
+        // var a = currentYaw - yaw;
+        // a = (a + 360) % 360;
 
-        double minDiff = 30;
+        // double minDiff = 30;
 
-        if (Math.abs(a) > minDiff) {
-            // rotate
-            if (a > 0) currentYaw -= minDiff;
-            else currentYaw += minDiff;
-        } else {
-            // set yaw to target yaw
-            currentYaw = yaw;
-        }
+        // if (Math.abs(a) < minDiff) {
+        //     // rotate
+        //     if (a > 0) currentYaw -= minDiff;
+        //     else currentYaw += minDiff;
+        // } else {
+        //     // set yaw to target yaw
+        //     currentYaw = yaw;
+        // }
 
-        this.entity.refreshPosition(Pos.fromPoint(physicsResult.newPosition()).withView(currentYaw, pitch));
+        this.entity.refreshPosition(Pos.fromPoint(physicsResult.newPosition()).withView(yaw, pitch));
     }
 
     public void jump(float height) {
@@ -212,7 +212,7 @@ public final class Navigator {
             jump(4.0f);
         }
 
-        // drawPath(path);
+        drawPath(path);
 
         if (entity.getPosition().sameBlock(currentTarget)) path.next();
     }

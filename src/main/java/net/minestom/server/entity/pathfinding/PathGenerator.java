@@ -23,7 +23,7 @@ public class PathGenerator {
     static Comparator<PNode> pNodeComparator = (s1, s2) -> (int) (((s1.g + s1.h) - (s2.g + s2.h)) * 1000);
     public static PPath generate(Instance instance, Pos orgStart, Point orgTarget, double closeDistance, double maxDistance, double pathVariance, BoundingBox boundingBox, Consumer<Void> onComplete) {
         Pos start = PNode.gravitySnap(instance, orgStart, boundingBox, 100);
-        Pos target = PNode.gravitySnap(instance, orgTarget.withX(orgTarget.blockX() + 0.5).withZ(orgTarget.blockZ() + 0.5), boundingBox, 100);
+        Pos target = PNode.gravitySnap(instance, orgTarget, boundingBox, 100);
 
         if (start == null || target == null) return null;
 
@@ -102,6 +102,13 @@ public class PathGenerator {
         }
 
         Collections.reverse(path.getNodes());
+
+        // Remove nodes that are too close to the start. Prevents doubling back to hit points that have already been hit
+        while (path.getNodes().size() > 0 && path.getNodes().get(0).getType() != PNode.NodeType.REPATH) {
+            if (path.getNodes().get(0).point.distance(start) < 1.5)
+                path.getNodes().remove(0);
+            else break;
+        }
 
         PNode pEnd = new PNode(target, 0, 0, PNode.NodeType.WALK, null);
         path.getNodes().add(pEnd);
