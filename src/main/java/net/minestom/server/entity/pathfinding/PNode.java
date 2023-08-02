@@ -101,7 +101,7 @@ public class PNode {
 
                 if (jumpPoint == null) continue;
                 if (!floorPoint.sameBlock(jumpPoint)) {
-                    var nodeJump = createJump(instance, jumpPoint, boundingBox, cost, point, goal, closed);
+                    var nodeJump = createJump(instance, jumpPoint, boundingBox, cost + 0.2, point, goal, closed);
                     if (nodeJump != null && !closed.contains(nodeJump)) nearby.add(nodeJump);
                 }
             }

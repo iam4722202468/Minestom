@@ -70,32 +70,31 @@ public final class Navigator {
         }
         final double radians = Math.atan2(dz, dx);
         final double speedX = Math.cos(radians) * speed;
-        final double speedY = Math.min(dy * speed, 0.3);
         final double speedZ = Math.sin(radians) * speed;
         final float yaw = PositionUtils.getLookYaw(dx, dz);
         final float pitch = PositionUtils.getLookPitch(dx, dy, dz);
 
         // Prevent ghosting
-        final var physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, speedY, speedZ));
+        final var physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
 
-        // var currentYaw = entity.getPosition().yaw();
+        var currentYaw = (entity.getPosition().yaw() + 360) % 360;
 
-        // // if difference between current yaw and target yaw is greater than 30 degrees, we need to rotate
-        // var a = currentYaw - yaw;
-        // a = (a + 360) % 360;
+        // if difference between current yaw and target yaw is greater than 30 degrees, we need to rotate
+        var a = currentYaw - yaw;
+        a = (a + 360) % 360;
 
-        // double minDiff = 30;
+        double minDiff = 30;
 
-        // if (Math.abs(a) < minDiff) {
-        //     // rotate
-        //     if (a > 0) currentYaw -= minDiff;
-        //     else currentYaw += minDiff;
-        // } else {
-        //     // set yaw to target yaw
-        //     currentYaw = yaw;
-        // }
+        if (Math.abs(a) < minDiff) {
+            // rotate
+            if (a > 0) currentYaw -= minDiff;
+            else currentYaw += minDiff;
+        } else {
+            // set yaw to target yaw
+            currentYaw = yaw;
+        }
 
-        this.entity.refreshPosition(Pos.fromPoint(physicsResult.newPosition()).withView(yaw, pitch));
+        this.entity.refreshPosition(Pos.fromPoint(physicsResult.newPosition()).withView(currentYaw, pitch));
     }
 
     public void jump(float height) {
@@ -110,7 +109,7 @@ public final class Navigator {
     }
 
     public synchronized boolean setPathTo(@Nullable Point point, double minimumDistance, Consumer<Void> onComplete) {
-        return setPathTo(point, minimumDistance, 50, 10, onComplete);
+        return setPathTo(point, minimumDistance, 25, 5, onComplete);
     }
 
     /**
