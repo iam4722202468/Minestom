@@ -98,8 +98,8 @@ public class PNode {
                 double cost = Math.sqrt(x * x + z * z) * 0.98;
 
                 Pos currentLevelPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z);
-                Pos upPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z).withY(point.blockY() + 1 + 0.5);
-                Pos downPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z).withY(point.blockY() - 1 - 0.5);
+                Pos upPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z).withY(point.blockY() + 1);
+                Pos downPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z).withY(point.blockY() - 1);
 
                 if (instance.getBlock(currentLevelPoint).compare(Block.WATER)) {
                     var nodeWalk = createFly(instance, currentLevelPoint, boundingBox, cost, point, goal, closed);
@@ -118,6 +118,20 @@ public class PNode {
             }
         }
 
+        // Straight up
+        Pos upPoint = point.withY(point.blockY() + 1);
+        if (instance.getBlock(upPoint).compare(Block.WATER)) {
+            var nodeJump = createFly(instance, upPoint, boundingBox, 2, point, goal, closed);
+            if (nodeJump != null && !closed.contains(nodeJump)) nearby.add(nodeJump);
+        }
+
+        // Straight down
+        Pos downPoint = point.withY(point.blockY() - 1);
+        if (instance.getBlock(downPoint).compare(Block.WATER)) {
+            var nodeFall = createFly(instance, downPoint, boundingBox, 2, point, goal, closed);
+            if (nodeFall != null && !closed.contains(nodeFall)) nearby.add(nodeFall);
+        }
+
         return nearby;
     }
 
@@ -134,8 +148,8 @@ public class PNode {
                 double cost = Math.sqrt(x * x + z * z) * 0.98;
 
                 Pos currentLevelPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z);
-                Pos upPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z).withY(point.blockY() + 1 + 0.5);
-                Pos downPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z).withY(point.blockY() - 1 - 0.5);
+                Pos upPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z).withY(point.blockY() + 1);
+                Pos downPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z).withY(point.blockY() - 1);
 
                 var nodeWalk = createFly(instance, currentLevelPoint, boundingBox, cost, point, goal, closed);
                 if (nodeWalk != null && !closed.contains(nodeWalk)) nearby.add(nodeWalk);
@@ -147,6 +161,16 @@ public class PNode {
                 if (nodeFall != null && !closed.contains(nodeFall)) nearby.add(nodeFall);
             }
         }
+
+        // Straight up
+        Pos upPoint = point.withY(point.blockY() + 1);
+        var nodeJump = createFly(instance, upPoint, boundingBox, 2, point, goal, closed);
+        if (nodeJump != null && !closed.contains(nodeJump)) nearby.add(nodeJump);
+
+        // Straight down
+        Pos downPoint = point.withY(point.blockY() - 1);
+        var nodeFall = createFly(instance, downPoint, boundingBox, 2, point, goal, closed);
+        if (nodeFall != null && !closed.contains(nodeFall)) nearby.add(nodeFall);
 
         return nearby;
     }

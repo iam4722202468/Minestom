@@ -159,7 +159,7 @@ public final class Navigator {
                         minimumDistance, maxDistance,
                         pathVariance,
                 this.entity.getBoundingBox(),
-                new PPath.PathfinderCapabilities(true, true, false, false, false, 0.4f), onComplete);
+                new PPath.PathfinderCapabilities(true, true, true, false, false, 0.4f), onComplete);
 
         final boolean success = path != null;
         this.goalPosition = success ? point : null;
