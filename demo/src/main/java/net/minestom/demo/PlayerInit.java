@@ -121,7 +121,7 @@ public class PlayerInit {
                 event.setSpawningInstance(instance);
                 int x = Math.abs(ThreadLocalRandom.current().nextInt()) % 500 - 250;
                 int z = Math.abs(ThreadLocalRandom.current().nextInt()) % 500 - 250;
-                player.setRespawnPoint(new Pos(-10, 80f, -10));
+                player.setRespawnPoint(new Pos(1300, 96, 123));
             })
             .addListener(PlayerSpawnEvent.class, event -> {
                 final Player player = event.getPlayer();
@@ -178,7 +178,7 @@ public class PlayerInit {
 
         instanceContainer.setTimeRate(0);
 
-        instanceContainer.setChunkLoader(new AnvilLoader("/home/ace/.local/share/multimc/instances/1.20.1/.minecraft/saves/wither_arena/"));
+        instanceContainer.setChunkLoader(new AnvilLoader("/home/ace/.local/share/multimc/instances/1.20.1/.minecraft/saves/New World (1)/"));
 
         System.out.println("start");
         var chunks = new ArrayList<CompletableFuture<Chunk>>();

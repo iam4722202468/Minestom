@@ -1,9 +1,6 @@
 package net.minestom.server.entity.pathfinding;
 
-import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Pos;
-import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -13,14 +10,18 @@ import java.util.function.Consumer;
 
 public class PPath {
     private final Consumer<Void> onComplete;
-    private final BoundingBox boundingBox;
-    private final Instance instance;
     private final List<PNode> nodes = new ArrayList<>();
     private final double pathVariance;
     private final double maxDistance;
+    private final PathfinderCapabilities capabilities;
     private int index = 0;
-    private final Pos initialPosition;
     private final AtomicReference<PathState> state = new AtomicReference<>(PathState.CALCULATING);
+
+    public PathfinderCapabilities capabilities() {
+        return capabilities;
+    }
+
+    public record PathfinderCapabilities (boolean land, boolean aquatic, boolean flying, boolean canJump, boolean canClimbAnything, float swimSpeedModifier) {}
 
     public void setState(PathState newState) {
         state.set(newState);
@@ -40,13 +41,11 @@ public class PPath {
         return nodes;
     }
 
-    public PPath(Pos point, Instance instance, BoundingBox boundingBox, double maxDistance, double pathVariance, Consumer<Void> onComplete) {
+    public PPath(double maxDistance, double pathVariance, PathfinderCapabilities capabilities, Consumer<Void> onComplete) {
         this.onComplete = onComplete;
-        this.initialPosition = point;
-        this.instance = instance;
-        this.boundingBox = boundingBox;
         this.maxDistance = maxDistance;
         this.pathVariance = pathVariance;
+        this.capabilities = capabilities;
     }
 
     void runComplete() {

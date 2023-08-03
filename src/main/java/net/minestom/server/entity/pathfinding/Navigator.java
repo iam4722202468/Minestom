@@ -55,10 +55,11 @@ public final class Navigator {
      * Gravity is still applied but the entity will not attempt to jump
      * Also update the yaw/pitch of the entity to look along 'direction'
      *
-     * @param direction the targeted position
-     * @param speed     define how far the entity will move
+     * @param direction    the targeted position
+     * @param speed        define how far the entity will move
+     * @param capabilities
      */
-    public void moveTowards(@NotNull Point direction, double speed) {
+    public void moveTowards(@NotNull Point direction, double speed, PPath.PathfinderCapabilities capabilities) {
         final Pos position = entity.getPosition();
         final double dx = direction.x() - position.x();
         final double dy = direction.y() - position.y();
@@ -74,27 +75,11 @@ public final class Navigator {
         final float yaw = PositionUtils.getLookYaw(dx, dz);
         final float pitch = PositionUtils.getLookPitch(dx, dy, dz);
 
+        final double speedY = (capabilities.flying() || capabilities.aquatic()) ? Math.signum(dy) * 0.1 : 0;
+
         // Prevent ghosting
-        final var physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
-
-        var currentYaw = (entity.getPosition().yaw() + 360) % 360;
-
-        // if difference between current yaw and target yaw is greater than 30 degrees, we need to rotate
-        var a = currentYaw - yaw;
-        a = (a + 360) % 360;
-
-        double minDiff = 30;
-
-        if (Math.abs(a) < minDiff) {
-            // rotate
-            if (a > 0) currentYaw -= minDiff;
-            else currentYaw += minDiff;
-        } else {
-            // set yaw to target yaw
-            currentYaw = yaw;
-        }
-
-        this.entity.refreshPosition(Pos.fromPoint(physicsResult.newPosition()).withView(currentYaw, pitch));
+        final var physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, speedY, speedZ));
+        this.entity.refreshPosition(Pos.fromPoint(physicsResult.newPosition()).withView(yaw, pitch));
     }
 
     public void jump(float height) {
@@ -166,12 +151,15 @@ public final class Navigator {
             return false;
         }
 
+        entity.setNoGravity(true);
+
         this.path = PathGenerator.generate(instance,
-                this.entity.getPosition(),
-                point,
-                minimumDistance, maxDistance,
-                pathVariance,
-                this.entity.getBoundingBox(), onComplete);
+                        this.entity.getPosition(),
+                        point,
+                        minimumDistance, maxDistance,
+                        pathVariance,
+                this.entity.getBoundingBox(),
+                new PPath.PathfinderCapabilities(true, true, false, false, false, 0.4f), onComplete);
 
         final boolean success = path != null;
         this.goalPosition = success ? point : null;
@@ -199,19 +187,19 @@ public final class Navigator {
                     entity.getPosition(),
                     Pos.fromPoint(goalPosition),
                     minimumDistance, path.maxDistance(),
-                    path.pathVariance(), entity.getBoundingBox(), null);
+                    path.pathVariance(), entity.getBoundingBox(), path.capabilities(), null);
 
             return;
         }
 
-        moveTowards(currentTarget, movementSpeed);
+        moveTowards(currentTarget, movementSpeed, path.capabilities());
 
-        if ((path.getCurrentType() == PNode.NodeType.JUMP || currentTarget.y() > entity.getPosition().y() + 0.1) && entity.isOnGround()) {
+        if ((path.getCurrentType() == PNode.NodeType.JUMP || currentTarget.y() > entity.getPosition().y() + 0.1) && entity.isOnGround() && path.capabilities().canJump()) {
             jumpCooldown.refreshLastUpdate(tick);
-            jump(4.0f);
+            jump(4f);
         }
 
-        // drawPath(path);
+        drawPath(path);
 
         if (entity.getPosition().sameBlock(currentTarget)) path.next();
     }
