@@ -34,7 +34,6 @@ public final class Navigator {
     private Point goalPosition;
     private final Entity entity;
     private PPath path;
-    private final Cooldown jumpCooldown = new Cooldown(Duration.of(20, TimeUnit.SERVER_TICK));
     private double minimumDistance;
     private float movementSpeed = 0.1f;
 
@@ -92,7 +91,7 @@ public final class Navigator {
 
         // Prevent ghosting
         final var physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, speedY, speedZ));
-        this.entity.refreshPosition(Pos.fromPoint(physicsResult.newPosition()).withView(yaw, pitch));
+        this.entity.teleport(Pos.fromPoint(physicsResult.newPosition()).withView(yaw, pitch));
     }
 
     public void jump(float height) {
@@ -170,7 +169,7 @@ public final class Navigator {
                         minimumDistance, maxDistance,
                         pathVariance,
                 this.entity.getBoundingBox(),
-                new PPath.PathfinderCapabilities(PPath.PathfinderType.FLYING, true, true, 0.4f), onComplete);
+                new PPath.PathfinderCapabilities(PPath.PathfinderType.AMPHIBIOUS, true, true, 0.4f), onComplete);
 
         final boolean success = path != null;
         this.goalPosition = success ? point : null;
@@ -205,8 +204,10 @@ public final class Navigator {
 
         moveTowards(currentTarget, movementSpeed, path.capabilities());
 
-        if ((path.getCurrentType() == PNode.NodeType.JUMP || currentTarget.y() > entity.getPosition().y() + 0.1) && entity.isOnGround() && path.capabilities().canJump()) {
-            jumpCooldown.refreshLastUpdate(tick);
+        if ((path.getCurrentType() == PNode.NodeType.JUMP || currentTarget.y() > entity.getPosition().y() + 0.1)
+                && entity.isOnGround()
+                && path.capabilities().canJump()
+        ) {
             jump(4f);
         }
 

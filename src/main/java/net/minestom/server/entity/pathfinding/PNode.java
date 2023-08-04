@@ -148,26 +148,30 @@ public class PNode {
                 if (x == 0 && z == 0) continue;
                 double cost = Math.sqrt(x * x + z * z) * 0.98;
 
+                // Land
                 {
                     Pos floorPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z);
                     floorPoint = gravitySnap(instance, floorPoint, boundingBox, 20);
                     if (floorPoint == null) continue;
 
-                    var nodeWalk = createWalk(instance, floorPoint, boundingBox, cost, point, goal, closed);
-                    if (nodeWalk != null && !closed.contains(nodeWalk)) nearby.add(nodeWalk);
+                    if (!instance.getBlock(floorPoint).compare(Block.WATER)) {
+                        var nodeWalk = createWalk(instance, floorPoint, boundingBox, cost, point, goal, closed);
+                        if (nodeWalk != null && !closed.contains(nodeWalk)) nearby.add(nodeWalk);
+                    }
 
                     for (int i = 1; i <= 1; ++i) {
                         Pos jumpPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z).add(0, i, 0);
                         jumpPoint = gravitySnap(instance, jumpPoint, boundingBox, 20);
 
                         if (jumpPoint == null) continue;
-                        if (!floorPoint.sameBlock(jumpPoint)) {
+                        if (!floorPoint.sameBlock(jumpPoint) && !instance.getBlock(jumpPoint).compare(Block.WATER)) {
                             var nodeJump = createJump(instance, jumpPoint, boundingBox, cost + 0.2, point, goal, closed);
                             if (nodeJump != null && !closed.contains(nodeJump)) nearby.add(nodeJump);
                         }
                     }
                 }
 
+                // Water
                 {
                     Pos currentLevelPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z).withY(point.blockY() + 0.5);
                     Pos upPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z).withY(point.blockY() + 1 + 0.5);

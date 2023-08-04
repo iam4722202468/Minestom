@@ -6,6 +6,7 @@ import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.block.Block;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -22,8 +23,17 @@ public class PathGenerator {
 
     static Comparator<PNode> pNodeComparator = (s1, s2) -> (int) (((s1.g + s1.h) - (s2.g + s2.h)) * 1000);
     public static PPath generate(Instance instance, Pos orgStart, Point orgTarget, double closeDistance, double maxDistance, double pathVariance, BoundingBox boundingBox, PPath.PathfinderCapabilities capabilities, Consumer<Void> onComplete) {
-        Pos start = (capabilities.type() == PPath.PathfinderType.AQUATIC || capabilities.type() == PPath.PathfinderType.FLYING) ? orgStart : PNode.gravitySnap(instance, orgStart, boundingBox, 100);
-        Pos target = (capabilities.type() == PPath.PathfinderType.AQUATIC || capabilities.type() == PPath.PathfinderType.FLYING) ? Pos.fromPoint(orgTarget) : PNode.gravitySnap(instance, orgTarget, boundingBox, 100);
+        Pos start = (capabilities.type() == PPath.PathfinderType.AQUATIC
+                || capabilities.type() == PPath.PathfinderType.FLYING
+                || (capabilities.type() == PPath.PathfinderType.AMPHIBIOUS && instance.getBlock(orgStart).compare(Block.WATER)))
+                    ? orgStart
+                    : PNode.gravitySnap(instance, orgStart, boundingBox, 100);
+
+        Pos target = (capabilities.type() == PPath.PathfinderType.AQUATIC
+                || capabilities.type() == PPath.PathfinderType.FLYING
+                || (capabilities.type() == PPath.PathfinderType.AMPHIBIOUS && instance.getBlock(orgTarget).compare(Block.WATER)))
+                    ? Pos.fromPoint(orgTarget)
+                    : PNode.gravitySnap(instance, orgTarget, boundingBox, 100);
 
         if (start == null || target == null) return null;
 
