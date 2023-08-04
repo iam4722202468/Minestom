@@ -14,6 +14,7 @@ public class ZombieCreature extends EntityCreature {
     public ZombieCreature() {
         super(EntityType.ZOMBIE);
         this.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.15f);
+        // this.setNoGravity(true);
         addAIGroup(
                 new EntityAIGroupBuilder()
                         .addTargetSelector(new ClosestEntityTarget(this, 500, Player.class))

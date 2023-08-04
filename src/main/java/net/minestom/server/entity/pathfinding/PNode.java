@@ -80,8 +80,9 @@ public class PNode {
     }
 
     public Collection<? extends PNode> getNearby(Instance instance, Set<PNode> closed, Point goal, @NotNull BoundingBox boundingBox, PPath.PathfinderCapabilities capabilities) {
-        if (capabilities.flying()) return getNearbyAir(instance, closed, goal, boundingBox, capabilities);
-        else if (capabilities.aquatic()) return getNearbyWater(instance, closed, goal, boundingBox, capabilities);
+        if (capabilities.type() == PPath.PathfinderType.FLYING) return getNearbyAir(instance, closed, goal, boundingBox, capabilities);
+        else if (capabilities.type() == PPath.PathfinderType.AQUATIC) return getNearbyWater(instance, closed, goal, boundingBox, capabilities);
+        else if (capabilities.type() == PPath.PathfinderType.AMPHIBIOUS) return getNearbyAmphibious(instance, closed, goal, boundingBox, capabilities);
         return getNearbyGround(instance, closed, goal, boundingBox, capabilities);
     }
 
@@ -114,6 +115,78 @@ public class PNode {
                 if (instance.getBlock(downPoint).compare(Block.WATER)) {
                     var nodeFall = createFly(instance, downPoint, boundingBox, cost, point, goal, closed);
                     if (nodeFall != null && !closed.contains(nodeFall)) nearby.add(nodeFall);
+                }
+            }
+        }
+
+        // Straight up
+        Pos upPoint = point.withY(point.blockY() + 1);
+        if (instance.getBlock(upPoint).compare(Block.WATER)) {
+            var nodeJump = createFly(instance, upPoint, boundingBox, 2, point, goal, closed);
+            if (nodeJump != null && !closed.contains(nodeJump)) nearby.add(nodeJump);
+        }
+
+        // Straight down
+        Pos downPoint = point.withY(point.blockY() - 1);
+        if (instance.getBlock(downPoint).compare(Block.WATER)) {
+            var nodeFall = createFly(instance, downPoint, boundingBox, 2, point, goal, closed);
+            if (nodeFall != null && !closed.contains(nodeFall)) nearby.add(nodeFall);
+        }
+
+        return nearby;
+    }
+
+    public Collection<? extends PNode> getNearbyAmphibious(Instance instance, Set<PNode> closed, Point goal, @NotNull BoundingBox boundingBox, PPath.PathfinderCapabilities capabilities) {
+        Collection<PNode> nearby = new ArrayList<>();
+        tempNode = new PNode(Pos.ZERO, 0, 0, this);
+
+        int stepSize = (int) Math.max(Math.floor(boundingBox.width() / 2), 1);
+        if (stepSize < 1) stepSize = 1;
+
+        for (int x = -stepSize; x <= stepSize; ++x) {
+            for (int z = -stepSize; z <= stepSize; ++z) {
+                if (x == 0 && z == 0) continue;
+                double cost = Math.sqrt(x * x + z * z) * 0.98;
+
+                {
+                    Pos floorPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z);
+                    floorPoint = gravitySnap(instance, floorPoint, boundingBox, 20);
+                    if (floorPoint == null) continue;
+
+                    var nodeWalk = createWalk(instance, floorPoint, boundingBox, cost, point, goal, closed);
+                    if (nodeWalk != null && !closed.contains(nodeWalk)) nearby.add(nodeWalk);
+
+                    for (int i = 1; i <= 1; ++i) {
+                        Pos jumpPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z).add(0, i, 0);
+                        jumpPoint = gravitySnap(instance, jumpPoint, boundingBox, 20);
+
+                        if (jumpPoint == null) continue;
+                        if (!floorPoint.sameBlock(jumpPoint)) {
+                            var nodeJump = createJump(instance, jumpPoint, boundingBox, cost + 0.2, point, goal, closed);
+                            if (nodeJump != null && !closed.contains(nodeJump)) nearby.add(nodeJump);
+                        }
+                    }
+                }
+
+                {
+                    Pos currentLevelPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z);
+                    Pos upPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z).withY(point.blockY() + 1);
+                    Pos downPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z).withY(point.blockY() - 1);
+
+                    if (instance.getBlock(currentLevelPoint).compare(Block.WATER)) {
+                        var nodeWalk = createFly(instance, currentLevelPoint, boundingBox, cost, point, goal, closed);
+                        if (nodeWalk != null && !closed.contains(nodeWalk)) nearby.add(nodeWalk);
+                    }
+
+                    if (instance.getBlock(upPoint).compare(Block.WATER)) {
+                        var nodeJump = createFly(instance, upPoint, boundingBox, cost, point, goal, closed);
+                        if (nodeJump != null && !closed.contains(nodeJump)) nearby.add(nodeJump);
+                    }
+
+                    if (instance.getBlock(downPoint).compare(Block.WATER)) {
+                        var nodeFall = createFly(instance, downPoint, boundingBox, cost, point, goal, closed);
+                        if (nodeFall != null && !closed.contains(nodeFall)) nearby.add(nodeFall);
+                    }
                 }
             }
         }

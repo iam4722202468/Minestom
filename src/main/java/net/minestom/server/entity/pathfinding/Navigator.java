@@ -69,13 +69,26 @@ public final class Navigator {
         if (speed > distSquared) {
             speed = distSquared;
         }
+
+        boolean inWater = false;
+        var instance = entity.getInstance();
+        if (instance != null)
+            if (instance.getBlock(position).isLiquid()) {
+                speed *= capabilities.swimSpeedModifier();
+                inWater = true;
+            }
+
         final double radians = Math.atan2(dz, dx);
         final double speedX = Math.cos(radians) * speed;
         final double speedZ = Math.sin(radians) * speed;
         final float yaw = PositionUtils.getLookYaw(dx, dz);
         final float pitch = PositionUtils.getLookPitch(dx, dy, dz);
 
-        final double speedY = (capabilities.flying() || capabilities.aquatic()) ? Math.signum(dy) * 0.1 : 0;
+        final double speedY = (capabilities.type() == PPath.PathfinderType.AQUATIC
+                || capabilities.type() == PPath.PathfinderType.FLYING
+                || (capabilities.type() == PPath.PathfinderType.AMPHIBIOUS && inWater))
+                ? Math.signum(dy) * 0.5 * speed
+                : 0;
 
         // Prevent ghosting
         final var physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, speedY, speedZ));
@@ -151,15 +164,13 @@ public final class Navigator {
             return false;
         }
 
-        entity.setNoGravity(true);
-
         this.path = PathGenerator.generate(instance,
                         this.entity.getPosition(),
                         point,
                         minimumDistance, maxDistance,
                         pathVariance,
                 this.entity.getBoundingBox(),
-                new PPath.PathfinderCapabilities(true, true, true, false, false, 0.4f), onComplete);
+                new PPath.PathfinderCapabilities(PPath.PathfinderType.AMPHIBIOUS, true, true, 0.4f), onComplete);
 
         final boolean success = path != null;
         this.goalPosition = success ? point : null;

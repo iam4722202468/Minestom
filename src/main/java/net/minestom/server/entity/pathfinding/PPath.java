@@ -21,7 +21,12 @@ public class PPath {
         return capabilities;
     }
 
-    public record PathfinderCapabilities (boolean land, boolean aquatic, boolean flying, boolean canJump, boolean canClimbAnything, float swimSpeedModifier) {}
+    public enum PathfinderType {
+        LAND, AQUATIC, FLYING, AMPHIBIOUS
+    }
+
+    public record PathfinderCapabilities (PathfinderType type, boolean canJump, boolean canClimbAnything, float swimSpeedModifier) {
+    }
 
     public void setState(PathState newState) {
         state.set(newState);

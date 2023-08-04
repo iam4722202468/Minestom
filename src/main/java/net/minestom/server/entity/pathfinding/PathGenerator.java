@@ -22,8 +22,8 @@ public class PathGenerator {
 
     static Comparator<PNode> pNodeComparator = (s1, s2) -> (int) (((s1.g + s1.h) - (s2.g + s2.h)) * 1000);
     public static PPath generate(Instance instance, Pos orgStart, Point orgTarget, double closeDistance, double maxDistance, double pathVariance, BoundingBox boundingBox, PPath.PathfinderCapabilities capabilities, Consumer<Void> onComplete) {
-        Pos start = (capabilities.flying() || capabilities.aquatic()) ? orgStart : PNode.gravitySnap(instance, orgStart, boundingBox, 100);
-        Pos target = (capabilities.flying() || capabilities.aquatic()) ? Pos.fromPoint(orgTarget) : PNode.gravitySnap(instance, orgTarget, boundingBox, 100);
+        Pos start = (capabilities.type() == PPath.PathfinderType.AQUATIC || capabilities.type() == PPath.PathfinderType.FLYING) ? orgStart : PNode.gravitySnap(instance, orgStart, boundingBox, 100);
+        Pos target = (capabilities.type() == PPath.PathfinderType.AQUATIC || capabilities.type() == PPath.PathfinderType.FLYING) ? Pos.fromPoint(orgTarget) : PNode.gravitySnap(instance, orgTarget, boundingBox, 100);
 
         if (start == null || target == null) return null;
 
