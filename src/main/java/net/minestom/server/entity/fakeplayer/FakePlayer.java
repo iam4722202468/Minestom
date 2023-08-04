@@ -118,7 +118,7 @@ public class FakePlayer extends Player implements NavigableEntity {
     public void update(long time) {
         super.update(time);
         // Path finding
-        this.navigator.tick(time);
+        this.navigator.tick();
     }
 
     @Override

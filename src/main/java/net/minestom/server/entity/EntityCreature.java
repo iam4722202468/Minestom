@@ -47,7 +47,7 @@ public class EntityCreature extends LivingEntity implements NavigableEntity, Ent
         aiTick(time);
 
         // Path finding
-        this.navigator.tick(time);
+        this.navigator.tick();
 
         // Fire, item pickup, ...
         super.update(time);

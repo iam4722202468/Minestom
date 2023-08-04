@@ -15,13 +15,10 @@ import net.minestom.server.particle.Particle;
 import net.minestom.server.particle.ParticleCreator;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.utils.position.PositionUtils;
-import net.minestom.server.utils.time.Cooldown;
-import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -91,7 +88,7 @@ public final class Navigator {
 
         // Prevent ghosting
         final var physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, speedY, speedZ));
-        this.entity.teleport(Pos.fromPoint(physicsResult.newPosition()).withView(yaw, pitch));
+        this.entity.refreshPosition(Pos.fromPoint(physicsResult.newPosition()).withView(yaw, pitch));
     }
 
     public void jump(float height) {
@@ -177,10 +174,21 @@ public final class Navigator {
     }
 
     @ApiStatus.Internal
-    public synchronized void tick(long tick) {
+    public synchronized void tick() {
         if (goalPosition == null) return; // No path
         if (entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) return; // No pathfinding tick for dead entities
         if (path == null) return;
+
+        if (path.getState() == PPath.PathState.COMPUTED) {
+            path.setState(PPath.PathState.FOLLOWING);
+            // Remove nodes that are too close to the start. Prevents doubling back to hit points that have already been hit
+            for (int i = 0; i < path.getNodes().size(); i++) {
+                if (path.getNodes().get(i).point.sameBlock(entity.getPosition())) {
+                    path.getNodes().subList(0, i).clear();
+                    break;
+                }
+            }
+        }
         if (path.getState() != PPath.PathState.FOLLOWING) return;
 
         if (this.entity.getPosition().distance(goalPosition) < minimumDistance) {

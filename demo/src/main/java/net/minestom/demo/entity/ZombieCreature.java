@@ -10,6 +10,7 @@ import net.minestom.server.entity.metadata.other.InteractionMeta;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
 public class ZombieCreature extends EntityCreature {
@@ -19,7 +20,7 @@ public class ZombieCreature extends EntityCreature {
         super(EntityType.ZOMBIE);
         this.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.15f);
         // this.setNoGravity(true);
-        this.setBoundingBox(1, 1, 1);
+        this.setBoundingBox(0.8, 0.8, 0.8);
 
         this.e = new LivingEntity(EntityType.INTERACTION);
         InteractionMeta meta = (InteractionMeta) e.getEntityMeta();
@@ -28,8 +29,8 @@ public class ZombieCreature extends EntityCreature {
 
         addAIGroup(
                 new EntityAIGroupBuilder()
-                        // .addTargetSelector(new ClosestEntityTarget(this, 500, Player.class))
-                        // .addGoalSelector(new FollowTargetGoal(this, Duration.ofMillis(500)))
+                        .addTargetSelector(new ClosestEntityTarget(this, 500, Player.class))
+                        .addGoalSelector(new FollowTargetGoal(this, Duration.ofMillis(500)))
                         .build()
         );
     }

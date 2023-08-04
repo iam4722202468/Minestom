@@ -5,12 +5,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class PPath {
     private final Consumer<Void> onComplete;
     private final List<PNode> nodes = new ArrayList<>();
+
     private final double pathVariance;
     private final double maxDistance;
     private final PathfinderCapabilities capabilities;
@@ -35,7 +37,7 @@ public class PPath {
     enum PathState {
         CALCULATING,
         FOLLOWING,
-        TERMINATING, TERMINATED, INVALID
+        TERMINATING, TERMINATED, COMPUTED, INVALID
     }
 
     PathState getState() {

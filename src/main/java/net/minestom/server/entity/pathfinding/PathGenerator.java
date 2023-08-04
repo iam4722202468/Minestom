@@ -113,13 +113,6 @@ public class PathGenerator {
 
         Collections.reverse(path.getNodes());
 
-        // Remove nodes that are too close to the start. Prevents doubling back to hit points that have already been hit
-        while (path.getNodes().size() > 0 && path.getNodes().get(0).getType() != PNode.NodeType.REPATH) {
-            if (path.getNodes().get(0).point.distance(start) < 1.5)
-                path.getNodes().remove(0);
-            else break;
-        }
-
         PNode pEnd = new PNode(target, 0, 0, PNode.NodeType.WALK, null);
         path.getNodes().add(pEnd);
 
@@ -128,7 +121,7 @@ public class PathGenerator {
             return;
         }
 
-        path.setState(PPath.PathState.FOLLOWING);
+        path.setState(PPath.PathState.COMPUTED);
     }
 
     private static boolean withinDistance(Pos point, Pos target, double closeDistance) {
