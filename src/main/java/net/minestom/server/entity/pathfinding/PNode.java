@@ -151,7 +151,7 @@ public class PNode {
                 // Land
                 {
                     Pos floorPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z);
-                    floorPoint = gravitySnap(instance, floorPoint, boundingBox, 20);
+                    floorPoint = gravitySnap(instance, floorPoint, boundingBox, 5);
                     if (floorPoint == null) continue;
 
                     if (!instance.getBlock(floorPoint).compare(Block.WATER)) {
@@ -161,7 +161,7 @@ public class PNode {
 
                     for (int i = 1; i <= 1; ++i) {
                         Pos jumpPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z).add(0, i, 0);
-                        jumpPoint = gravitySnap(instance, jumpPoint, boundingBox, 20);
+                        jumpPoint = gravitySnap(instance, jumpPoint, boundingBox, 5);
 
                         if (jumpPoint == null) continue;
                         if (!floorPoint.sameBlock(jumpPoint) && !instance.getBlock(jumpPoint).compare(Block.WATER)) {
@@ -265,7 +265,7 @@ public class PNode {
                 double cost = Math.sqrt(x * x + z * z) * 0.98;
 
                 Pos floorPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z);
-                floorPoint = gravitySnap(instance, floorPoint, boundingBox, 20);
+                floorPoint = gravitySnap(instance, floorPoint, boundingBox, 5);
                 if (floorPoint == null) continue;
 
                 var nodeWalk = createWalk(instance, floorPoint, boundingBox, cost, point, goal, closed);
@@ -273,7 +273,7 @@ public class PNode {
 
                 for (int i = 1; i <= 1; ++i) {
                     Pos jumpPoint = point.withX(point.blockX() + 0.5 + x).withZ(point.blockZ() + 0.5 + z).add(0, i, 0);
-                    jumpPoint = gravitySnap(instance, jumpPoint, boundingBox, 20);
+                    jumpPoint = gravitySnap(instance, jumpPoint, boundingBox, 5);
 
                     if (jumpPoint == null) continue;
                     if (!floorPoint.sameBlock(jumpPoint)) {

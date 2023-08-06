@@ -103,7 +103,7 @@ public final class Navigator {
     }
 
     public synchronized boolean setPathTo(@Nullable Point point, double minimumDistance, Consumer<Void> onComplete) {
-        return setPathTo(point, minimumDistance, 25, 5, onComplete);
+        return setPathTo(point, minimumDistance, 25, 5, PPath.PathfinderType.LAND, onComplete);
     }
 
     /**
@@ -116,7 +116,7 @@ public final class Navigator {
      * @param onComplete called when the path has been completed
      * @return true if a path has been found
      */
-    public synchronized boolean setPathTo(@Nullable Point point, double minimumDistance, double maxDistance, double pathVariance, Consumer<Void> onComplete) {
+    public synchronized boolean setPathTo(@Nullable Point point, double minimumDistance, double maxDistance, double pathVariance, PPath.PathfinderType type, Consumer<Void> onComplete) {
         if (point != null && goalPosition != null && point.samePoint(goalPosition) && this.path != null) {
             // Tried to set path to the same target position
             return false;
@@ -166,7 +166,7 @@ public final class Navigator {
                         minimumDistance, maxDistance,
                         pathVariance,
                 this.entity.getBoundingBox(),
-                new PPath.PathfinderCapabilities(PPath.PathfinderType.AMPHIBIOUS, true, true, 0.4f), onComplete);
+                new PPath.PathfinderCapabilities(type, true, true, 0.4f), onComplete);
 
         final boolean success = path != null;
         this.goalPosition = success ? point : null;
