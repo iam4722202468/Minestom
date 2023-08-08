@@ -117,13 +117,13 @@ public final class Navigator {
      * @return true if a path has been found
      */
     public synchronized boolean setPathTo(@Nullable Point point, double minimumDistance, double maxDistance, double pathVariance, PPath.PathfinderType type, Consumer<Void> onComplete) {
-        if (point != null && goalPosition != null && point.samePoint(goalPosition) && this.path != null) {
-            // Tried to set path to the same target position
-            return false;
-        }
+        double previousDistance = point == null || goalPosition == null ? 0 : entity.getPosition().distance(goalPosition);
+        double currentDistance = point == null ? 0 : point.distance(entity.getPosition());
 
-        if (this.path != null) {
-            this.path.setState(PPath.PathState.TERMINATING);
+        double percentageDifference = previousDistance == 0 ? 0 : Math.abs(currentDistance - previousDistance) / previousDistance;
+
+        if (point != null && goalPosition != null && this.path != null && percentageDifference < 0.01) {
+            return false;
         }
 
         final Instance instance = entity.getInstance();
@@ -160,6 +160,8 @@ public final class Navigator {
             return false;
         }
 
+        if (this.path != null) this.path.setState(PPath.PathState.TERMINATING);
+
         this.path = PathGenerator.generate(instance,
                         this.entity.getPosition(),
                         point,
@@ -189,6 +191,7 @@ public final class Navigator {
                 }
             }
         }
+
         if (path.getState() != PPath.PathState.FOLLOWING) return;
 
         if (this.entity.getPosition().distance(goalPosition) < minimumDistance) {

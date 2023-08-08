@@ -8,7 +8,10 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -115,11 +118,6 @@ public class PathGenerator {
 
         PNode pEnd = new PNode(target, 0, 0, PNode.NodeType.WALK, null);
         path.getNodes().add(pEnd);
-
-        if (path.getNodes().size() <= 2) {
-            path.setState(PPath.PathState.INVALID);
-            return;
-        }
 
         path.setState(PPath.PathState.COMPUTED);
     }
