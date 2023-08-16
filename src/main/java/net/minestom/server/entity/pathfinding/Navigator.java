@@ -47,7 +47,8 @@ public final class Navigator {
     }
 
     public PPath.PathState getState() {
-        if (path == null) return PPath.PathState.INVALID;
+        if (path == null && computingPath == null) return PPath.PathState.INVALID;
+        if (path == null) return computingPath.getState();
         return path.getState();
     }
 
@@ -285,7 +286,8 @@ public final class Navigator {
     }
 
     public List<PNode> getNodes() {
-        if (this.path == null) return null;
+        if (this.path == null && computingPath == null) return null;
+        if (this.path == null) return computingPath.getNodes();
         return this.path.getNodes();
     }
 
