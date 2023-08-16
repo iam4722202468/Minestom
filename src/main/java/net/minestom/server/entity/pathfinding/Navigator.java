@@ -30,7 +30,11 @@ import java.util.function.Consumer;
 public final class Navigator {
     private Point goalPosition;
     private final Entity entity;
+
+    // Essentially a double buffer. Wait until a path is done computing before replpacing the old one.
+    private PPath computingPath;
     private PPath path;
+
     private double minimumDistance;
     private float movementSpeed = 0.1f;
 
@@ -43,6 +47,7 @@ public final class Navigator {
     }
 
     public PPath.PathState getState() {
+        if (path == null) return PPath.PathState.INVALID;
         return path.getState();
     }
 
@@ -103,7 +108,7 @@ public final class Navigator {
     }
 
     public synchronized boolean setPathTo(@Nullable Point point, double minimumDistance, Consumer<Void> onComplete) {
-        return setPathTo(point, minimumDistance, 25, 5, PPath.PathfinderType.LAND, onComplete);
+        return setPathTo(point, minimumDistance, 100, 20, PPath.PathfinderType.LAND, onComplete);
     }
 
     /**
@@ -160,9 +165,9 @@ public final class Navigator {
             return false;
         }
 
-        if (this.path != null) this.path.setState(PPath.PathState.TERMINATING);
+        if (this.computingPath != null) this.computingPath.setState(PPath.PathState.TERMINATING);
 
-        this.path = PathGenerator.generate(instance,
+        this.computingPath = PathGenerator.generate(instance,
                         this.entity.getPosition(),
                         point,
                         minimumDistance, maxDistance,
@@ -170,7 +175,7 @@ public final class Navigator {
                 this.entity.getBoundingBox(),
                 new PPath.PathfinderCapabilities(type, true, true, 0.4f), onComplete);
 
-        final boolean success = path != null;
+        final boolean success = computingPath != null;
         this.goalPosition = success ? point : null;
         return success;
     }
@@ -179,6 +184,24 @@ public final class Navigator {
     public synchronized void tick() {
         if (goalPosition == null) return; // No path
         if (entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) return; // No pathfinding tick for dead entities
+        if (computingPath != null && computingPath.getState() == PPath.PathState.COMPUTED) {
+            if (path != null) {
+                var currentNode = path.getCurrent();
+                if (currentNode != null) {
+                    for (int i = 0; i < computingPath.getNodes().size(); ++i) {
+                        var node = computingPath.getNodes().get(i);
+                        if (node.point.sameBlock(currentNode)) {
+                            computingPath.getNodes().subList(0, i).clear();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            path = computingPath;
+            computingPath = null;
+        }
+
         if (path == null) return;
 
         if (path.getState() == PPath.PathState.COMPUTED) {
@@ -204,7 +227,7 @@ public final class Navigator {
         Point currentTarget = path.getCurrent();
 
         if (currentTarget == null || path.getCurrentType() == PNode.NodeType.REPATH || path.getCurrentType() == null) {
-            path = PathGenerator.generate(entity.getInstance(),
+            computingPath = PathGenerator.generate(entity.getInstance(),
                     entity.getPosition(),
                     Pos.fromPoint(goalPosition),
                     minimumDistance, path.maxDistance(),
@@ -244,6 +267,9 @@ public final class Navigator {
         if (this.path != null) this.path.setState(PPath.PathState.TERMINATING);
         this.goalPosition = null;
         this.path = null;
+
+        if (this.computingPath != null) this.computingPath.setState(PPath.PathState.TERMINATING);
+        this.computingPath = null;
     }
 
     public boolean isComplete() {
