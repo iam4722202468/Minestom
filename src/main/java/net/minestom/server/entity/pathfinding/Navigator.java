@@ -60,11 +60,16 @@ public final class Navigator {
      * @param speed        define how far the entity will move
      * @param capabilities
      */
-    public void moveTowards(@NotNull Point direction, double speed, PPath.PathfinderCapabilities capabilities) {
+    public void moveTowards(@NotNull Point direction, double speed, PPath.PathfinderCapabilities capabilities, Point lookAt) {
         final Pos position = entity.getPosition();
         final double dx = direction.x() - position.x();
         final double dy = direction.y() - position.y();
         final double dz = direction.z() - position.z();
+
+        final double dxLook = lookAt.x() - position.x();
+        final double dyLook = lookAt.y() - position.y();
+        final double dzLook = lookAt.z() - position.z();
+
         // the purpose of these few lines is to slow down entities when they reach their destination
         final double distSquared = dx * dx + dy * dy + dz * dz;
         if (speed > distSquared) {
@@ -82,8 +87,8 @@ public final class Navigator {
         final double radians = Math.atan2(dz, dx);
         final double speedX = Math.cos(radians) * speed;
         final double speedZ = Math.sin(radians) * speed;
-        final float yaw = PositionUtils.getLookYaw(dx, dz);
-        final float pitch = PositionUtils.getLookPitch(dx, dy, dz);
+        final float yaw = PositionUtils.getLookYaw(dxLook, dzLook);
+        final float pitch = PositionUtils.getLookPitch(dxLook, dyLook, dzLook);
 
         final double speedY = (capabilities.type() == PPath.PathfinderType.AQUATIC
                 || capabilities.type() == PPath.PathfinderType.FLYING
@@ -91,7 +96,6 @@ public final class Navigator {
                 ? Math.signum(dy) * 0.5 * speed
                 : 0;
 
-        // Prevent ghosting
         final var physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, speedY, speedZ));
         this.entity.refreshPosition(Pos.fromPoint(physicsResult.newPosition()).withView(yaw, pitch));
     }
@@ -225,6 +229,9 @@ public final class Navigator {
         }
 
         Point currentTarget = path.getCurrent();
+        Point nextTarget = path.getNext();
+
+        if (nextTarget == null) nextTarget = goalPosition;
 
         if (currentTarget == null || path.getCurrentType() == PNode.NodeType.REPATH || path.getCurrentType() == null) {
             computingPath = PathGenerator.generate(entity.getInstance(),
@@ -236,7 +243,7 @@ public final class Navigator {
             return;
         }
 
-        moveTowards(currentTarget, movementSpeed, path.capabilities());
+        moveTowards(currentTarget, movementSpeed, path.capabilities(), nextTarget);
 
         if ((path.getCurrentType() == PNode.NodeType.JUMP || currentTarget.y() > entity.getPosition().y() + 0.1)
                 && entity.isOnGround()

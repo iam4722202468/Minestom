@@ -22,6 +22,12 @@ public class PPath {
         return capabilities;
     }
 
+    public Point getNext() {
+        if (index + 1 >= nodes.size()) return null;
+        var current = nodes.get(index + 1);
+        return current.point;
+    }
+
     public enum PathfinderType {
         LAND, AQUATIC, FLYING, AMPHIBIOUS
     }
