@@ -332,8 +332,7 @@ public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, Ev
         final Pos currentPosition = this.position;
         if (currentPosition.sameView(yaw, pitch)) return;
         this.position = currentPosition.withView(yaw, pitch);
-        sendPacketToViewersAndSelf(new EntityHeadLookPacket(getEntityId(), yaw));
-        sendPacketToViewersAndSelf(new EntityRotationPacket(getEntityId(), yaw, pitch, onGround));
+        synchronizeView();
     }
 
     /**
@@ -1568,6 +1567,11 @@ public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, Ev
         this.lastSyncedPosition = posCache;
     }
 
+    private void synchronizeView() {
+        sendPacketToViewersAndSelf(new EntityHeadLookPacket(getEntityId(), position.yaw()));
+        sendPacketToViewersAndSelf(new EntityRotationPacket(getEntityId(), position.yaw(), position.pitch(), onGround));
+    }
+
     /**
      * Asks for a synchronization (position) to happen during next entity tick.
      */
@@ -1768,6 +1772,7 @@ public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, Ev
         DYING,
         CROAKING,
         USING_TONGUE,
+        SITTING,
         ROARING,
         SNIFFING,
         EMERGING,
