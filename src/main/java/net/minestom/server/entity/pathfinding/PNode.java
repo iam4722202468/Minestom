@@ -367,7 +367,6 @@ public class PNode {
     private static boolean canMoveTowards(Instance instance, Pos start, Point end, BoundingBox boundingBox) {
         Point diff = end.sub(start);
         PhysicsResult res = CollisionUtils.handlePhysics(instance, instance.getChunkAt(start), boundingBox, start, Vec.fromPoint(diff), null, false);
-        // res = CollisionUtils.handlePhysics(instance, instance.getChunkAt(start), boundingBox, res.newPosition(), Vec.fromPoint(diff), res, false);
         return !res.collisionZ() && !res.collisionY() && !res.collisionX();
     }
 

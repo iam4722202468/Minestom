@@ -1,14 +1,15 @@
 package net.minestom.demo;
 
 import net.kyori.adventure.text.Component;
-import net.minestom.demo.entity.ZombieCreature;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.adventure.audience.Audiences;
-import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.*;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.GameMode;
+import net.minestom.server.entity.ItemEntity;
+import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -32,10 +33,7 @@ import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.server.world.DimensionType;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
@@ -69,16 +67,6 @@ public class PlayerInit {
                     event.setCancelled(!((Player) entity).getInventory().addItemStack(itemStack));
                 }
             })
-            .addListener(PlayerMoveEvent.class, event -> {
-                var iterator = event.getPlayer().getBoundingBox().getBlocks(event.getNewPosition());
-
-                // Instance i = event.getPlayer().getInstance();
-                // while (iterator.hasNext()) {
-                //     var block = iterator.next();
-                //     var packet = ParticleCreator.createParticlePacket(Particle.CRIT, block.blockX() + 0.5, block.blockY() + 0.5, block.blockZ() + 0.5, 0,0, 0,0);
-                //     event.getPlayer().sendPacketToViewersAndSelf(packet);
-                // }
-            })
             .addListener(ItemDropEvent.class, event -> {
                 final Player player = event.getPlayer();
                 ItemStack droppedItem = event.getItemStack();
@@ -89,28 +77,6 @@ public class PlayerInit {
                 itemEntity.setInstance(player.getInstance(), playerPos.withY(y -> y + 1.5));
                 Vec velocity = playerPos.direction().mul(6);
                 itemEntity.setVelocity(velocity);
-
-                BoundingBox bb = new BoundingBox(0.6, 1.8, 0.6);
-                long time = System.currentTimeMillis();
-
-                LivingEntity mob = new ZombieCreature();
-                mob.setInstance(player.getInstance(), player.getPosition());
-
-                // PPath path = PathGenerator.generate(player.getInstance(),
-                //         new Pos(-4.077202061490588, 71.00000083734253, -10.510650557803915, (float) -88.942894, 0.0F),
-                //         player.getPosition(),
-                //         1, 500,
-                //         20, bb, null);
-
-                // lastPos = player.getPosition();
-
-                // if (path == null) {
-                //     System.out.println("path is null");
-                //     return;
-                // }
-
-                // System.out.println("time " + (System.currentTimeMillis() - time));
-                // System.out.println("path " + path.getNodes());
             })
             .addListener(PlayerDisconnectEvent.class, event -> System.out.println("DISCONNECTION " + event.getPlayer().getUsername()))
             .addListener(PlayerLoginEvent.class, event -> {
@@ -121,7 +87,7 @@ public class PlayerInit {
                 event.setSpawningInstance(instance);
                 int x = Math.abs(ThreadLocalRandom.current().nextInt()) % 500 - 250;
                 int z = Math.abs(ThreadLocalRandom.current().nextInt()) % 500 - 250;
-                player.setRespawnPoint(new Pos(1300, 96, 123));
+                player.setRespawnPoint(new Pos(0, 40f, 0));
             })
             .addListener(PlayerSpawnEvent.class, event -> {
                 final Player player = event.getPlayer();
@@ -177,20 +143,16 @@ public class PlayerInit {
 
         InstanceContainer instanceContainer = instanceManager.createInstanceContainer(DimensionType.OVERWORLD);
         instanceContainer.setGenerator(unit -> unit.modifier().fillHeight(0, 40, Block.STONE));
-        // instanceContainer.setChunkSupplier(LightingChunk::new);
+        instanceContainer.setChunkSupplier(LightingChunk::new);
 
-        instanceContainer.setTimeRate(0);
+        // System.out.println("start");
+        // var chunks = new ArrayList<CompletableFuture<Chunk>>();
+        // ChunkUtils.forChunksInRange(0, 0, 32, (x, z) -> chunks.add(instanceContainer.loadChunk(x, z)));
 
-        instanceContainer.setChunkLoader(new AnvilLoader("/home/ace/.local/share/multimc/instances/1.20.1/.minecraft/saves/New World (1)/"));
-
-        System.out.println("start");
-        var chunks = new ArrayList<CompletableFuture<Chunk>>();
-        ChunkUtils.forChunksInRange(0, 0, 32, (x, z) -> chunks.add(instanceContainer.loadChunk(x, z)));
-
-        CompletableFuture.runAsync(() -> {
-            CompletableFuture.allOf(chunks.toArray(CompletableFuture[]::new)).join();
-            System.out.println("load end");
-        });
+        // CompletableFuture.runAsync(() -> {
+        //     CompletableFuture.allOf(chunks.toArray(CompletableFuture[]::new)).join();
+        //     System.out.println("load end");
+        // });
 
         inventory = new Inventory(InventoryType.CHEST_1_ROW, Component.text("Test inventory"));
         inventory.setItemStack(3, ItemStack.of(Material.DIAMOND, 34));
