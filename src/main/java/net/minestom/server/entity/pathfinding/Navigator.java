@@ -22,8 +22,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
 
-// TODO all pathfinding requests could be processed in another thread
-
 /**
  * Necessary object for all {@link NavigableEntity}.
  */
