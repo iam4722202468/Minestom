@@ -7,7 +7,9 @@ plugins {
     alias(libs.plugins.nexuspublish)
 }
 
-version = System.getenv("SHORT_COMMIT_HASH") ?: "dev"
+// Read env vars (used for publishing generally)
+version = System.getenv("MINESTOM_VERSION") ?: "dev"
+var channel = System.getenv("MINESTOM_CHANNEL") ?: "local" // local, snapshot, release
 
 allprojects {
     apply(plugin = "java")
@@ -44,6 +46,10 @@ allprojects {
         // Viewable packets make tracking harder. Could be re-enabled later.
         jvmArgs("-Dminestom.viewable-packet=false")
         jvmArgs("-Dminestom.inside-test=true")
+    }
+
+    tasks.withType<JavaCompile> {
+        options.encoding = "UTF-8"
     }
 }
 
@@ -120,7 +126,7 @@ tasks {
 
     publishing.publications.create<MavenPublication>("maven") {
         groupId = "dev.hollowcube"
-        artifactId = "minestom-ce"
+        artifactId = if (channel == "snapshot") "minestom-ce-snapshots" else "minestom-ce"
         version = project.version.toString()
 
         from(project.components["java"])
